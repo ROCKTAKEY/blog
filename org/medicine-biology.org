@@ -1,0 +1,17 @@
+#+title: Medicine/Biology
+#+author: ROCKTAKEY
+#+date: <2020-08-05 Wed>
+#+options: ^:{}
+
+#+hugo_base_dir: ../
+#+hugo_section: medicine-biology
+
+#+link: files file+sys:../static/files/
+
+* TODO Medicine/Biology
+ :PROPERTIES:
+ :EXPORT_FILE_NAME: _index
+ :EXPORT_HUGO_LASTMOD: <2020-08-05 Wed 12:33>
+ :END:
+
+  生物と医学。

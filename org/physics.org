@@ -1,0 +1,17 @@
+#+title: Physics
+#+author: ROCKTAKEY
+#+date: <2020-08-05 Wed>
+#+options: ^:{}
+
+#+hugo_base_dir: ../
+#+hugo_section: physics
+
+#+link: files file+sys:../static/files/
+
+* TODO Physics
+ :PROPERTIES:
+ :EXPORT_FILE_NAME: _index
+ :EXPORT_HUGO_LASTMOD: <2020-08-05 Wed 12:33>
+ :END:
+
+  物理学。相対論と量子論楽しい。物理化学ももっとやりたい。

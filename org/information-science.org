@@ -1,0 +1,17 @@
+#+title: Information Science
+#+author: ROCKTAKEY
+#+date: <2020-08-04 Tue>
+#+options: ^:{}
+
+#+hugo_base_dir: ../
+#+hugo_section: information-science
+
+#+link: files file+sys:../static/files/
+
+* TODO Information Science
+ :PROPERTIES:
+ :EXPORT_FILE_NAME: _index
+ :EXPORT_HUGO_LASTMOD: [2020-08-06 Wed 12:33]
+ :END:
+
+  主にEmacsの話になりそう。C++や競技プログラミングの話もするかも。

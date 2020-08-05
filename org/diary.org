@@ -1,0 +1,17 @@
+#+title: Diary
+#+author: ROCKTAKEY
+#+date: <2020-08-05 Wed>
+#+options: ^:{}
+
+#+hugo_base_dir: ../
+#+hugo_section: diary
+
+#+link: files file+sys:../static/files/
+
+* TODO Diary
+ :PROPERTIES:
+ :EXPORT_FILE_NAME: _index
+ :EXPORT_HUGO_LASTMOD: <2020-08-05 Wed 12:40>
+ :END:
+
+  徒然なるままに。
