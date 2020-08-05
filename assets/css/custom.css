@@ -1,0 +1,103 @@
+html {
+    --section-tag-color: #448844;
+    --sponsor-color: #ef6fff
+}
+
+html[data-theme='dark'] {
+  --bg-color: #272727;
+  --secondary-bg-color: #000000;
+  --heading-color:#aaaaff;
+  --body-color: #faf5d0;
+  --post-color: rgba(0, 0, 0, 0.44);
+  --border-color: rgb(38, 38, 38);
+  --pre-bg-color: rgb(33, 33, 45);
+  --nav-text-color: #97defa;
+  --tag-color: #ef6fff;
+  --section-tag-color: #55ff99;
+  --sponsor-color: #ef6fff
+}
+
+.sidebar .social-links a {
+    color: var(--nav-text-color);
+}
+
+.sidebar .social-links {
+  list-style: none;
+  padding: 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+.sidebar .social-links .sponsor i {
+  margin-right: 3px;
+}
+
+.sidebar .social-links .sponsor li {
+  display: inline;
+  padding: 0 4px;
+  line-height: 0;
+}
+
+
+.sidebar .social-links .sponsor a {
+    display: inline;
+    color: var(--sponsor-color);
+}
+
+
+/* List of contents */
+.list-with-title .h2 {
+
+}
+
+.list-with-title .tag a {
+    font-size: 20px
+}
+
+.list-with-title .tag a .num {
+    color: var(--section-tag-color);
+}
+
+
+.post {
+    font-size: 18px
+}
+
+p {
+    font-size: 18px
+}
+
+
+/* Title of each section */
+.post .post-title h1 {
+    color: var(--nav-text-color);
+    font-size: 50px
+}
+
+.post-content .post-title h3 {
+    font-size: 50px;
+}
+
+.post .post-content .info a {
+    color: var(--tag-color)
+}
+
+.post .post-content .info .section_tag a {
+    color: var(--section-tag-color)
+}
+
+.post .post-footer .info .section_tag a {
+    color: var(--section-tag-color)
+}
+
+
+/* .archive.animated.fadeInDown { */
+/*   -webkit-animation-name: false; */
+/*   -moz-animation-name: false; */
+/*   -o-animation-name: false; */
+/*   animation-name: false; */
+/* } */
+
+.info {
+    font-size: 15px
+}

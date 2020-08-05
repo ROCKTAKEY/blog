@@ -1,5 +1,61 @@
 baseURL = "https://rocktakey.netlify.app/"
 languageCode = "ja"
-title = "ROCKTAKEY"
+title = "ROCKTAKEY's Site"
 
-theme="hugo-theme-iris"
+theme = "anatole"
+
+[taxonomies]
+    tag = "tags"
+
+[params]
+    description = "Love Emacs, major medical biology, study mathematics and physics. "
+    profilePicture = "images/logo.png"
+    customCss = ["css/custom.css"]
+    title = "ROCKTAKEY's Site"
+
+[[params.socialIcons]]
+    icon = "fa-github"
+    url = "https://github.com/ROCKTAKEY"
+[[params.socialIcons]]
+    icon = "fa-twitter"
+    url = "https://twitter.com/rocktakey"
+[[params.socialIcons]]
+    icon = "fa-envelope-o"
+    url = "rocktakey@gmail.com"
+
+[[params.sponsorIcons]]
+    icon = "fa-amazon"
+    url = "https://www.amazon.jp/hz/wishlist/ls/19PQEBYE2EL1O?ref_=wl_share"
+[[params.sponsorIcons]]
+    icon = "fa-heart"
+    url = "https://github.com/sponsors/ROCKTAKEY"
+
+[menu]
+    [[menu.main]]
+        name = "Home"
+        url = "/"
+        weight = 1
+    [[menu.main]]
+        name = "Diary"
+        url = "/Diary/"
+        weight = 2
+    [[menu.main]]
+        name = "Information Science"
+        url = "/information-science/"
+        weight = 5
+    [[menu.main]]
+        name = "Medicine/Biology"
+        url = "/medicine-biology/"
+        weight = 10
+    [[menu.main]]
+        name = "Mathematics"
+        url = "/mathematics/"
+        weight = 15
+    [[menu.main]]
+        name = "Physics"
+        url = "/physics/"
+        weight = 20
+    [[menu.main]]
+        name = "Tags"
+        url = "/tags/"
+        weight = 100
