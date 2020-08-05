@@ -12,7 +12,6 @@
   CLOSED: [2020-08-05 Wed 17:37]
  :PROPERTIES:
  :EXPORT_FILE_NAME: _index
- :EXPORT_HUGO_LASTMOD: <2020-08-05 Wed 12:40>
  :END:
 
   徒然なるままに。
@@ -20,7 +19,6 @@
   CLOSED: [2020-08-05 Wed 18:44]
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2020-bea1c459-5d15-3d24-87bb-74483215630a
-  :EXPORT_HUGO_LASTMOD: [2020-08-05 Wed 18:39]
   :END:
   どこかにアウトプット場所がないとあれだし、、、と思ってから
   かなり経ってしまったが、やっと自分のサイトを立ち上げられた。
@@ -32,3 +30,5 @@
   #+begin_src emacs-lisp :tangle yes
   (format "%s" user-emacs-directory)
   #+end_src
+
+  うーむ、コードが色付けされないな。
