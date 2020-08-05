@@ -2,6 +2,9 @@ baseURL = "https://rocktakey.netlify.app/"
 languageCode = "ja"
 title = "ROCKTAKEY's Site"
 
+pygmentsUseClasses = true
+pygmentsCodefences = true
+
 theme = "anatole"
 
 [taxonomies]
