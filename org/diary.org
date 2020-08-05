@@ -29,6 +29,9 @@
 
   #+begin_src emacs-lisp :tangle yes
   (format "%s" user-emacs-directory)
+  (defun xyz ()
+   "Hello"
+   (+ 1 2))
   #+end_src
 
   うーむ、コードが色付けされないな。
