@@ -16,6 +16,10 @@ theme = "anatole"
     customCss = ["css/custom.css", "css/syntax.css"]
     title = "ROCKTAKEY's Site"
 
+[params.math]
+    enable = true
+    use = "mathjax"
+
 [[params.socialIcons]]
     icon = "fa-github"
     url = "https://github.com/ROCKTAKEY"
