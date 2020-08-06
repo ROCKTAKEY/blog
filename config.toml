@@ -17,7 +17,7 @@ theme = "anatole"
     profilePicture = "images/logo.png"
     customCss = ["css/custom.css", "css/syntax.css"]
     title = "ROCKTAKEY's Site"
-
+    author = "ROCKTAKEY"
 # [params.math]
 #     enable = true
 #     use = "mathjax"
