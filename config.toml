@@ -1,5 +1,7 @@
 baseURL = "https://rocktakey.netlify.app/"
 languageCode = "ja"
+DefaultContentLanguage = "ja"
+hasCJKLanguage = true
 title = "ROCKTAKEY's Site"
 
 pygmentsUseClasses = true
