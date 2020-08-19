@@ -9,6 +9,8 @@ pygmentsCodefences = true
 
 theme = "anatole"
 
+disqusShortname = "rocktakey"
+
 [taxonomies]
     tag = "tags"
 
@@ -18,9 +20,19 @@ theme = "anatole"
     customCss = ["css/custom.css", "css/syntax.css"]
     title = "ROCKTAKEY's Site"
     author = "ROCKTAKEY"
+    displayMode = "dark"
+
 # [params.math]
 #     enable = true
 #     use = "mathjax"
+
+    mainSections = [
+                 "diary",
+                 "information-science",
+                 "mathematics",
+                 "medicine-biology",
+                 "physics"
+                 ]
 
 [[params.socialIcons]]
     icon = "fa-github"
