@@ -81,11 +81,13 @@ p {
 }
 
 .post .post-content .info a {
+    text-decoration: none;
     color: var(--tag-color)
 }
 
 .post .post-content .info .section_tag a {
-    color: var(--section-tag-color)
+    text-decoration: none;
+    color: var(--section-tag-color);
 }
 
 .post .post-footer .info .section_tag a {
@@ -128,4 +130,11 @@ code, kbd {
   letter-spacing: 1px;
   background-color: var(--link-hover-color);
   color: var(--body-color);
+}
+
+.fadeInDown {
+  -webkit-animation-name: none;
+  -moz-animation-name: none;
+  -o-animation-name: none;
+  animation-name: none;
 }
