@@ -20,7 +20,6 @@ disqusShortname = "rocktakey"
     customCss = ["css/custom.css", "css/syntax.css"]
     title = "ROCKTAKEY's Site"
     author = "ROCKTAKEY"
-    displayMode = "dark"
 
 # [params.math]
 #     enable = true
