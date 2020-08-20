@@ -17,6 +17,7 @@ html[data-theme='dark']{
 html[data-theme='light']{
     --link-color: #3a5fcd;
     --link-hover-color: #c1ffc1;
+    --sponsor-color: #ef6fff;
 }
 
 .sidebar .social-links a {
