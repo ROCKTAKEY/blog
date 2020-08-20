@@ -161,6 +161,6 @@ table th {
     background-color: var(--secondary-bg-color);
 }
 
-.sane-table {
+.table-caption {
     text-align: center;
 }
