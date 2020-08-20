@@ -139,3 +139,23 @@ code, kbd {
   -o-animation-name: none;
   animation-name: none;
 }
+
+table {
+    text-align: center;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+table th, td{
+    padding: 5px 15px;
+    border: solid 1px;
+
+}
+
+table th {
+    background-color: var(--secondary-bg-color);
+}
+
+.sane-table {
+    text-align: center;
+}
