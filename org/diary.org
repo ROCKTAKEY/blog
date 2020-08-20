@@ -7,6 +7,8 @@
 #+hugo_section: diary
 
 #+link: files file+sys:../static/files/
+#+link: images https://raw.githubusercontent.com/ROCKTAKEY/images/netlify/%(my-org-netlify)
+# ~my-org-netlify~ can be gotten from https://gist.github.com/ROCKTAKEY/e67ec5f1db4fbc9f1976fb7a3b27e2ef
 
 * DONE Diary
   CLOSED: [2020-08-05 Wed 17:37]
