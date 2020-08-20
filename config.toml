@@ -11,6 +11,9 @@ theme = "anatole"
 
 disqusShortname = "rocktakey"
 
+[markup.goldmark.renderer]
+  unsafe = true
+
 [taxonomies]
     tag = "tags"
 
