@@ -140,6 +140,11 @@ code, kbd {
   animation-name: none;
 }
 
+svg {
+    background-color: #ffffff;
+    padding: 10px;
+}
+
 table {
     text-align: center;
     margin: 0 auto;
