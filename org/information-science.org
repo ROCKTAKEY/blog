@@ -18,3 +18,272 @@
  :END:
 
   主にEmacsの話になりそう。C++や競技プログラミングの話もするかも。
+* DONE tab-bar-modeを探検する
+  CLOSED: [2020-08-21 Fri 19:22]
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2020-d99103ba-db6f-5424-3053-087c12ab74be
+  :EXPORT_HUGO_TAGS: Emacs Emacs-Lisp tab-bar-mode
+  :END:
+** 導入
+   Emacs-27.1で、 ~tab-bar-mode~ と ~tab-line-mode~ が追加された。
+
+   ~tab-line-mode~ では、[[fig:tab-line-mode]]にあるように、
+   ウィンドウ[fn:1:Emacsにおいては、一般に言うウィンドウをフレームと言い、フレームを分割したものをウィンドウと言う。]
+   上部(ヘッダラインという)にバッファ一覧が
+   タブとして表示される。バッファ切り替えを行うときにそれをクリックすることで
+   バッファを切り替えられる。
+   実装を見ると、どうやら ~window-next-buffers~ と ~window-prev-buffers~ を用いて
+   表示するバッファを決めているようなので、さしあたりでは ~C-x b~ (~switch-bufer~)
+   の一部代替、及び ~next/previous-buffer~ の代替が目的だろう。
+   バッファリストが表示されるという点では ~C-x C-b~ (~list-buffer~)や ~ibuffer~ の
+   代替とも捉えられるが、横幅に限りがあることと、そもそも ~window-next/prev-buffer~
+   では全バッファを網羅できないことを踏まえると、完全に置き換えるには貧弱だろう。
+   ~tab-line-mode~ に関しては、バッファ切り替えを文字以外で行うのに
+   慣れることができそうもないので、ここまでにしておく。
+
+   #+caption: ~global-tab-line-mode~ をオンにしたEmacs。各ウィンドウにタブ欄がある。
+   #+attr_latex: scale=0.75
+   #+label: fig:tab-line-mode
+   [[images:tab-line-mode.png]]
+
+   私が今回説明したいのは、 ~tab-bar-mode~ である。こちらは先程とは違い、
+   *1つのフレーム[fn:1]につき1つ* 、一番上にタブ欄が表示される。
+   このタブが切り替えるのはウィンドウ構成、つまりどの位置になんのバッファを表示した
+   ウィンドウがあるかの情報、である。これはとても有用だ。
+   単純に表示領域が足りないからというのもあるが、やはり大きいのは、
+   突然別のことをやりたくなったときに今の状態を保持してさっと移り、
+   終わったら戻ってこれるからだ。だれしも一度は経験した、「さっきなに見てたっけ」
+   「さっきまでなにがしたかったんだっけ」というのが格段に減ることだろう。
+   現実世界にもはやく実装されてほしい。今まで机の上を保存したいと何度思ったことか。
+
+   #+caption: ~tab-bar-mode~ をオンにしたEmacs。ウィンドウは複数あるがタブ欄は1つだけだ。
+   #+attr_latex: scale=0.75
+   #+label: fig:tab-bar-mode
+   [[images:tab-bar-mode.png]]
+
+*** ~elscreen~ との比較
+   話が逸れてしまったが、これが有用であることに変わりはない。同じことをしてくれるパッケージには、
+   [[https://github.com/knu/elscreen][~elscreen~]] がある。こちらも同様にウィンドウ構成を切り替えられ、今まで利用してきたが、
+   いくつか欠点がある。
+
+   一つは、タブの表示が貧弱なことだ。
+   基本的にヘッダラインに表示しているので、(同じ内容なのに)全てのウィンドウで表示されたり、
+   左右に分割されているウィンドウでは半分しか見えなかったりといった感じで、
+   痒いところに手が届かない。やはりタイトルバーのようにフレーム一杯に広がっている領域が1つだけ欲しい。
+   そういうわけで過去に[[https://github.com/conao3/navbar.el][navbar.el]]というものの制作([[https://github.com/papaeye/emacs-navbar][元]]があるので正確には改修)に少しだけ携わった
+   ことがある(今もメンテナではあります)が、いかんせん古いコードだったので、かなりバギーで、
+   動作が怪しい。それに比べると、 ~tab-bar-mode~ はかなり優秀だと思う。
+   先程述べたとおり、 ~tab-bar-mode~ では1フレームにつき一つ、タブ一覧がフレーム一杯に広がっている。
+   それでいて、GNU Emacsに取り込まれていることからある程度の動作は保証されているからだ。
+
+   もう一つは、前段落とやや被るが、 ~elscreen~ は外部パッケージであることだ。
+   あくまでもGNU Emacsの外の存在である。ウィンドウ構成周りは元々複雑でバグが入りやすいため、
+   ウィンドウ構成の管理が外部パッケージだと、どうしても怪しい動作が目立つ。
+   その点 ~tab-bar-mode~ はGNU Emacsに取り込まれているので、安心できる。
+   もちろんバグが絶対にないわけではないが、本家に入っているなら安定性は重視されているだろう。
+
+   ただし、もちろん利点もある。 ~elscreen~ はかなりの古参なので、拡張がたくさんある。
+   ~elscreen-persist~ なんかは(MELPAからは消えているとはいえ)その筆頭だろう。
+   ~tab-bar-mode~ にそのような類のものはまだないので、
+   永続化したい人は乗り換えを待ったほうがいいかもしれない。
+
+
+** 基本的な使い方とキーバインド
+   まず、 ~M-x tab-bar-mode~ で ~tab-bar-mode~ をオンにすることで上部にタブが出てくる
+   [fn:2:なお、この操作は必須ではない。名前とは矛盾するが、 ~tab-bar-mode~ がオフでも
+   ~tab~ 系の関数を使うことができる。]。
+   気に入ったら ~init.el~ に以下のように書けばよい。
+   #+begin_src emacs-lisp :tangle yes
+   (tab-bar-mode +1)
+   #+end_src
+
+   見た目については、アクティブなタブは ~tab-bar-tab~ 、
+   非アクティブなタブは ~tab-bar-tab-inactive~ のfaceを変更すれば変えられる。
+   といってもどちらも ~tab-bar~ にinheritしているので、
+   ~tab-bar~ のほうのfaceを変えるのがお手軽かもしれない。
+
+   と、ここまではただの見た目だ。これはとりあえず見た目を他と合わせたい自分用。
+   とりあえず、先にキーバインドを示しておく。prefixは ~C-x t~ で ~tab-prefix-map~
+   に登録されているので、もしこれを変えたければ適宜 ~define-key~ すればよい。
+
+   #+caption: ~tab-bar~ 系のキーバインド(~C-x t~ は省略)
+   | key        | function                     | summary                    |
+   |------------+------------------------------+----------------------------|
+   | ~2~        | ~tab-new~                    | タブの新規作成             |
+   | ~1~        | ~tab-close-other~            | 現在のタブ以外全て削除     |
+   | ~0~        | ~tab-close~                  | 現在のタブの削除           |
+   | ~o~        | ~tab-next~                   | 次のタブへ移動             |
+   | ~m~        | ~tab-move~                   | 現在のタブの位置を移動     |
+   | ~r~        | ~tab-rename~                 | タブに名前を付ける         |
+   | ~RET~      | ~tab-bar-select-tab-by-name~ | 名前でタブを選択           |
+   | ~b~        | ~switch-to-buffer-other-tab~ | バッファを新しいタブで開く |
+   | ~C-f~, ~f~ | ~find-file-other-tab~        | ファイルを新しいタブで開く |
+
+
+   各コマンドの詳細はこれから書くが、基本は ~C-x t 2~ でさくっとタブを作り、
+   おわったら ~C-x t 0~ で消す運用だろう。名前はお好みで ~C-x t r~ を使って付ける。
+   一斉に消したければ ~C-x t 1~ 。これくらい覚えていれば使えると思う。
+
+*** 各キーの説明
+   ~2~ (~tab-new~)、 ~1~ (~tab-close-other~)、 ~0~ (~tab-close~)、 ~o~ (~tab-next~)に関しては、
+   バッファやウィンドウを操作する ~C-x~ 系の
+   ~split-window-below~ (~C-x 2~)、 ~delete-other-windows~ (~C-x 1~)、
+   ~delete-window~ (~C-x 0~)、 ~other-window~ (~C-x o~)に倣っているようだ。
+   たしかに、間に ~t~ を挟むだけだし、手に馴染んでいるのでわかりやすい。
+   3ストロークはちと多い気もするが、連発するものでもないのでそこまで問題なさそうだ。
+
+   ~m~ (~tab-move~)はすこしわかりづらいかもしれないが、要は表示されたタブの並び換えに使う
+   ものだ。現在のタブを一つ右に移動させる。並べ替えにどれほどの需要があるかは
+   不明だが、複数の関連するウィンドウ構成をまとめておきたいときには有用だろう。
+
+   ~r~ (~tab-rename~)はタブに名前を付けるものだ。renameの名が冠されているが、
+   デフォルトではタブには名前がなく、カレントバッファの名前が動的に表示される
+   ([[#tab-bar-tab-name-function][こちら]]で変更可能)ので、
+   名前を最初につけるときにも使うことになる。フランクに使うなら
+   わざわざ名前はつけなくてもいいかもしれない。
+
+   ~RET~ (~tab-bar-select-tab-by-name~)は名前を入力してタブを選択する形だ。
+   名前がついてない場合はカレントバッファが候補の名前となる。
+   ~completing-read~ を直で呼んでいるので、 ~ido~ や ~ivy~ を使いたければ 他と同様に
+   ~completing-read-function~ を ~ido-completing-read~ や ~ivy-completing-read~ とすればよいだろう。
+
+   ~b~ (~switch-to-buffer-other-tab~)、 ~f~ 、 ~C-f~ (~find-file-other-tab~)も ~C-x~ 系に倣っている。
+   それぞれ選択したバッファ、ファイルを新しいタブで開くもので、丁度
+   ~C-x b~ (~switch-to-buffer~)と ~C-x C-f~ (~find-file~)に対応している。
+
+*** ~tab-bar-history-mode~
+    また、 ~tab-bar-history-mode~ というものもある。これは各タブでウィンドウ構成の履歴を
+    辿れるようにするものだ。よほど重たいのでなければ、オンにしない手はない。
+    #+begin_src emacs-lisp :tangle yes
+    (tab-bar-history-mode +1)
+    #+end_src
+    利用できる関数は2つだけ。 ~tab-bar-history-back~ と ~tab-bar-history-forward~ だ。
+    それぞれがウィンドウ構成履歴を戻る、進む役割をもつ。
+    また、タブ一覧の一番左側にでてくる2つの矢印にも同じものが割り当てられている。
+
+** Custom variables
+   この節ではカスタマイズ変数の説明をする。括弧内は初期値。
+   あまり重要でなさそうなのは載せてないので、各自で調べてね☆
+
+*** ~tab-bar-show~ (~t~)
+    先述のようなタブ操作系のキーバインドを使ったときに、自動で ~tab-bar-mode~ を
+    オンにして、タブを表示するかどうか。 ~t~ なら常にそうする。
+    ~nil~ なら常にそうしない。 ~1~ なら2つ以上のタブがあるときだけ表示する。
+
+*** ~tab-bar-new-tab-choice~ (~t~)
+    新規タブがどの状態で始まるかどうか。 ~t~ ならカレントバッファ1つ。
+    ~nil~ なら現在のタブを複製。
+    文字列ならその名前のバッファ、なければファイルやディレクトリを探して開く。
+    関数ならその返り値のバッファを開く。個人的には動的に決められるようになっているのが
+    とても好み。よき。
+
+*** ~tab-bar-new-button-show~ (~t~)、 ~tab-bar-close-button-show~ (~t~)
+    新規タブボタン、タブ削除ボタンを表示するかどうか。~t~ なら表示、 ~nil~ なら
+    非表示。 ~tab-bar-close-button-show~ の場合、 さらに
+    ~selected~ (カレントタブでのみ表示)と ~non-selected~ (カレントタブ以外で表示)の二つも可能。
+
+*** ~tab-bar-tab-hints~ (~nil~)
+    タブに連番を表示するかどうか。
+
+*** ~tab-bar-tab-name-function~ (~tab-bar-tab-name-current~)
+    :PROPERTIES:
+    :CUSTOM_ID: tab-bar-tab-name-function
+    :END:
+    名前がないとき、名前をどう決めるか。デフォルトではカレントバッファ名
+    を返す ~tab-bar-tab-name-current~ ([[fig:tab-bar-tab-name-current]])となっているが、
+    任意の関数に変更可能。
+    windowの数を数えて付け加えてくれる ~tab-bar-tab-name-current-with-count~
+    ([[fig:tab-bar-tab-name-current-with-count]])、
+    長さが ~tab-bar-tab-name-truncated-max~ を超えると省略してくれる
+    ~tab-bar-tab-name-truncated~ ([[fig:tab-bar-tab-name-truncated]])、
+    表示されている全バッファの名前をカンマで繋げてくれる
+    ~tab-bar-tab-name-all~ ([[fig:tab-bar-tab-name-all]])が用意されている。
+    自身で作った関数でももちろんOK。
+
+    #+caption: ~tab-bar-tab-name-current~ のとき(デフォルト)
+    #+attr_latex: scale=0.75
+    #+label: fig:tab-bar-tab-name-current
+    [[images:tab-bar-tab-name-current.png]]
+
+    #+caption: ~tab-bar-tab-name-current-with-count~ のとき
+    #+attr_latex: scale=0.75
+    #+label: fig:tab-bar-tab-name-current-with-count
+    [[images:tab-bar-tab-name-current-with-count.png]]
+
+    #+caption: ~tab-bar-tab-name-truncated~ のとき
+    #+attr_latex: scale=0.75
+    #+label: fig:tab-bar-tab-name-truncated
+    [[images:tab-bar-tab-name-truncated.png]]
+
+    #+caption: ~tab-bar-tab-name-all~ のとき
+    #+attr_latex: scale=0.75
+    #+label: fig:tab-bar-tab-name-all
+    [[images:tab-bar-tab-name-all.png]]
+
+*** ~tab-bar-new-tab-to~ (~right~)
+    新しいタブをどこに作るか。 ~left~ や ~right~ なら現在のタブの左右に、
+    ~leftmost~ や ~rightmost~ なら一番左や一番右に作る。
+
+*** ~tab-bar-close-tab-select~ (~recent~)
+    現在のタブを閉じたとき、どのタブに移動するか。
+    ~recent~ なら最近利用したタブに、 ~left~ や ~right~ なら元々あったタブの左右の
+    タブに移動する。
+
+*** ~tab-bar-close-last-tab-choice~ (~nil~)
+    最後の1つのタブを閉じたときにどうするか。
+    ~nil~ ならなにもしない。 ~delete-frame~ なら現在のフレームを削除。
+    ~tab-bar-mode-disable~ なら ~tab-bar-mode~ をオフにする。
+    また、関数を渡すと閉じたときに関数を実行してくれる。
+
+** 改造
+   せっかく1フレーム1つの領域を手に入れたので、自由に表示したい。
+   日付や時計、場合によってはbranchなんかも、1フレーム1つで十分だろう。
+
+   というわけで、しくみをざっくりと見て、真似してみようではないか。
+   と思って見てみると、なんだかおもしろい記述が。
+
+   #+caption: tab-bar-mode.el L197-199
+   #+begin_src emacs-lisp :tangle yes
+   (global-set-key [tab-bar]
+                   `(menu-item ,(purecopy "tab bar") ignore
+                               :filter tab-bar-make-keymap))
+   #+end_src
+   どうやら ~[tab-bar]~ にメニューアイテムを割り当てると画面上部に表示できるらしい。
+   おもしろい試みだ。 ~navbar.el~ ではバッファを表示させていたのに対し、
+   専用の領域を用意したわけか。(試しに~[tab-bar2]~に同じものを割り当ててみたが、
+   なにも表示されなかったので、おそらく新しく専用の領域を作ったのだろう。)
+
+   恥ずかしながら ~menu-item~ 形式の ~global-set-key~ は初めて見たので、
+   ~define-key~ のヘルプをみてみると、InfoファイルのExtended Menu Itemsの項に
+   説明があるらしい。(日本語版は(24.5のものだが)[[https://ayatakesi.github.io/emacs/24.5/elisp_html/Extended-Menu-Items.html][ここ]]にある。ほとんどかわっていないので
+   問題ない。)これを読むと、どうやら ~:filter~ に渡された関数 ~tab-bar-make-keymap~ は、
+   3番目の ~ignore~ というシンボルを受けとり(~tab-bar~ では使ってないので適当なシンボル
+   をおいているっぽい)、キーマップを返すものらしい。本来は ~ignore~ の位置に
+   キーマップを直接置くが、動的に生成したいときは ~:filter~ を使う、という感じのようだ。
+
+   ~tab-bar-make-keymap~ は内部的には ~tab-bar-make-keymap-1~ を呼んでいるだけだが、
+   この関数は通常我々が使うようなキーマップとは毛色が異なり、
+   ~cdr~ の各要素のほとんどは /~(symbol~/ ~menu-item~ /~string function)~/ となっている。
+   /~symbol~/ は識別子で、 /~string~/ が表示される文字列だ。クリックすることで
+   /~function~/ が呼び出される。もし単に文字を表示したければ、 ~tab-bar~ の
+   セパレータの表示に倣って /~function~/ を ~ignore~ にすればよいだろう。
+
+   さあこれで準備は整った。要は ~tab-bar-make-keymap-1~ をハックして、
+   さっきの形式で文字列をいれてやればいいのだろう。
+
+   というわけで ~tab-bar-display~ というパッケージを作った。
+
+   https://gh-card.dev/repos/ROCKTAKEY/tab-bar-display.svg
+
+   使いかたは簡単で、 ~tab-bar-display-before~ と ~tab-bar-display-after~ に
+   ~format-mode-line~ 形式で表示したいものを書いて、 ~tab-bar-display-mode~
+   を ~tab-bar-mode~ と共にオンにしておけば、タブ一覧の前後にそれが表示される。
+
+   #+caption: ~tab-bar-display-mode~ を用いた例
+   #+attr_latex: scale=0.75
+   #+label: fig:tab-bar-display-mode
+   [[images:tab-bar-display.png]]
+
+** まとめ
+   ~tab-bar-mode~ はとても便利というはなしでした。
+   かなり便利そうなので ~elcreen~ を捨てて乗り換えようかしら。
