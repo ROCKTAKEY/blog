@@ -29,7 +29,7 @@ disqusShortname = "rocktakey"
     title = "ROCKTAKEY's Site"
     author = "ROCKTAKEY"
     favicon = "favicons/"
-
+    images = "images/logo.png"
 # [params.math]
 #     enable = true
 #     use = "mathjax"

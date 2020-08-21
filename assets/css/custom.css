@@ -63,20 +63,12 @@ html[data-theme='light']{
     color: var(--section-tag-color);
 }
 
-
-.post {
-    font-size: 18px
-}
-
-p {
-    font-size: 18px
-}
-
-
 /* Title of each section */
 .post .post-title h1 {
     color: var(--nav-text-color);
-    font-size: 50px
+    font-size: 50px;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 .post-content .post-title h3 {
@@ -225,6 +217,15 @@ section.footnotes p,li{
     display: none;
 }
 
+.post {
+  background-color: var(--bg-color);
+  margin: 20px;
+}
+
+.post .post {
+    margin: 0;
+}
+
 @media screen and (max-width: 960px) {
     .info #TableOfContents {
         display: block;
@@ -251,4 +252,9 @@ section.footnotes p,li{
         /* bottom: 0; */
     }
 
+}
+
+.sidebar .logo-title .title h3 {
+    text-transform: none;
+    letter-spacing: 0;
 }
