@@ -194,3 +194,13 @@ table th {
 .table-caption {
     text-align: center;
 }
+
+img {
+    margin: 0 auto;
+    text-align: center;
+    display: block;
+}
+
+section.footnotes p,li{
+    font-size: 15px;
+}
