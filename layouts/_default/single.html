@@ -18,6 +18,9 @@
                 {{ with .Section }}<a href={{ . | absURL }}>{{ . }}</a>{{ end }}
             </div>
             {{ with .Page.Params.Tags }}{{ partial "taxonomy/tags.html" . }}{{ end }}
+            <aside>
+                {{ .TableOfContents }}
+            </aside>
         </div>
         {{ .Content }}
     </div>

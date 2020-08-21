@@ -204,3 +204,51 @@ img {
 section.footnotes p,li{
     font-size: 15px;
 }
+
+.sidebar {
+    overflow: auto;
+}
+
+#TableOfContents a {
+    color: var(--section-color);
+}
+
+#TableOfContents a:hover {
+    background-color: var(--link-hover-color);
+}
+
+.footer {
+    position: static;
+}
+
+.info #TableOfContents {
+    display: none;
+}
+
+@media screen and (max-width: 960px) {
+    .info #TableOfContents {
+        display: block;
+    }
+
+    .sidebar {
+        overflow: auto;
+        position: static;
+    }
+    .sidebar #TableOfContents {
+        display: none;
+    }
+
+    .page-top {
+        position: fixed;
+        top: 0;
+    }
+    .main .content {
+        margin: 0;
+    }
+    .footer {
+        display: block;
+        /* position: fixed; */
+        /* bottom: 0; */
+    }
+
+}
