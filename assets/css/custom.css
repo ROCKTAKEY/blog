@@ -4,7 +4,7 @@ html[data-theme='dark']{
   --heading-color:#aaaaff;
   --body-color: #faf5d0;
   --post-color: rgba(0, 0, 0, 0.44);
-  --border-color: rgb(38, 38, 38);
+  --border-color: #353535;
   --pre-bg-color: rgb(33, 33, 45);
   --nav-text-color: #97defa;
   --tag-color: #ef6fff;
@@ -12,12 +12,14 @@ html[data-theme='dark']{
   --sponsor-color: #ef6fff;
   --link-color: #00ffff;
   --link-hover-color: #556b2f;
+  --section-color: #fdca66;
 }
 
 html[data-theme='light']{
     --link-color: #3a5fcd;
     --link-hover-color: #c1ffc1;
     --sponsor-color: #ef6fff;
+    --section-color: #a0522d;
 }
 
 .sidebar .social-links a {
@@ -79,6 +81,31 @@ p {
 
 .post-content .post-title h3 {
     font-size: 50px;
+    text-transform: none;
+}
+
+.content .post-title h3 {
+    text-transform: none;
+}
+
+.post-content h2 {
+    font-size: 40px;
+    color: var(--section-color);
+}
+
+.post-content h3 {
+    font-size: 30px;
+    color: var(--section-color);
+}
+
+.post-content h4 {
+    font-size: 20px;
+    color: var(--section-color);
+}
+
+.post-content h5 {
+    font-size: 18px;
+    color: var(--section-color);
 }
 
 .post .post-content .info a {
@@ -118,6 +145,9 @@ pre.chroma {
 code, kbd {
     font-family: Consolas, SFMono-Regular, Menlo, Monaco,
                  "Liberation Mono", "Courier New", monospace;
+    background-color: var(--border-color);
+    padding: 0 5px;
+    border-radius: 5px;
 }
 
 .post .post-content a {
