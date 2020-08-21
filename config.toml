@@ -4,6 +4,8 @@ DefaultContentLanguage = "ja"
 hasCJKLanguage = true
 title = "ROCKTAKEY's Site"
 
+enableRobotsTXT = true;
+
 pygmentsUseClasses = true
 pygmentsCodefences = true
 
