@@ -136,6 +136,9 @@ p {
 
 code:not([class]) {
     color: var(--nav-text-color);
+    background-color: var(--border-color);
+    padding: 0 5px;
+    border-radius: 5px;
 }
 
 pre.chroma {
@@ -145,9 +148,6 @@ pre.chroma {
 code, kbd {
     font-family: Consolas, SFMono-Regular, Menlo, Monaco,
                  "Liberation Mono", "Courier New", monospace;
-    background-color: var(--border-color);
-    padding: 0 5px;
-    border-radius: 5px;
 }
 
 .post .post-content a {
