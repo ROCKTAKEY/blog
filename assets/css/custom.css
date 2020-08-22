@@ -223,7 +223,7 @@ section.footnotes p,li{
 }
 
 .post .post {
-    margin: 0;
+    margin: 20px 0;
 }
 
 @media screen and (max-width: 960px) {
