@@ -139,6 +139,11 @@ pre.chroma {
     border: solid;
 }
 
+pre.chroma code:not([class]) {
+    padding: 0 0;
+    border-radius: 0;
+}
+
 code, kbd {
     font-family: Consolas, SFMono-Regular, Menlo, Monaco,
                  "Liberation Mono", "Courier New", monospace;
@@ -169,13 +174,13 @@ svg {
     padding: 10px;
 }
 
-table {
+table:not(.lntable) {
     text-align: center;
     margin: 0 auto;
     border-collapse: collapse;
 }
 
-table th, td{
+table th, td {
     padding: 5px 15px;
     border: solid 1px;
 
@@ -196,7 +201,7 @@ img {
 }
 
 section.footnotes p,li{
-    font-size: 15px;
+    font-size: 10px;
 }
 
 .sidebar {
