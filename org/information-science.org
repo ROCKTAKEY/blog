@@ -287,3 +287,32 @@
 ** まとめ
    ~tab-bar-mode~ はとても便利というはなしでした。
    かなり便利そうなので ~elcreen~ を捨てて乗り換えようかしら。
+* DONE chocolateyのインストールをするとMcAfeeに邪魔される
+  CLOSED: [2020-08-23 Sun 21:13]
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2020-0536cd60-b6e5-2e44-26db-e9d895d148be
+  :EXPORT_HUGO_TAGS: chocolatey McAfee
+  :END:
+  Haskellのコンパイラのghcをインストールしようとしたら、
+  chocolateyが必要と言われた。気になってはいたので、いれてみようと一念発起。
+
+  [[https://chocolatey.org/install][chocolateyのインストールセクション]]にPowershell用のインストールコマンドがあるので、
+  (~ExecutionPolicy AllSigned~ したあと)ペーストして実行した。が、謎のエラーが。
+  #+BEGIN_SRC text -n
+$ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+発生場所 行:1 文字:1
++ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.Service ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+このスクリプトには、悪質なコンテンツが含まれているため、ウイルス対策ソフトウェアによりブロックされています。
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : ScriptContainedMaliciousContent
+  #+END_SRC
+  こいつとともにMcAfeeが「ウイルスいたから殺しといたわ!」と通知してきたので、
+  たぶんMcAfeeのせいだろう。ファイアウォールとリアルタイムスキャンを無効にするも、
+  変わらず。お手上げかと思ったが、[[https://qiita.com/konta220/items/95b40b4647a737cb51aa#2-chocolatey%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%82%92%E5%AE%9F%E8%A1%8C][Qiitaの記事]]をみつけた。ここにある画像の、3つ目のスクリプトは
+  全文みえているので、一か八かで実行。
+  #+BEGIN_SRC shell -n
+  iwr https://chocolatey.org/install.ps1 -UseBasic Parsing | iex
+  #+END_SRC
+  最初のスクリプトとなんの差があったのかはわからないが、無事インストールできた。
+  よかった。
