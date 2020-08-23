@@ -71,9 +71,11 @@ html[data-theme='light']{
     letter-spacing: 0;
 }
 
-.post-content .post-title h3 {
+.post-content .post-title h1 {
     font-size: 50px;
     text-transform: none;
+    color: var(--heading-color);
+    margin: 0;
 }
 
 .content .post-title h3 {
@@ -213,7 +215,7 @@ section.footnotes p,li{
     position: static;
 }
 
-.info #TableOfContents {
+.info #TableOfContents{
     display: none;
 }
 
