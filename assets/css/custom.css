@@ -269,3 +269,7 @@ section.footnotes p, section.footnotes li{
     text-transform: none;
     letter-spacing: 0;
 }
+
+#fb_comments_container {
+  margin: 10px;
+}
