@@ -25,7 +25,7 @@ disqusShortname = "rocktakey"
     customCss = ["css/custom.css", "css/syntax.css",
     # "https://tikzjax.com/v1/fonts.css"
     ]
-    customJs = ["js/custom.js"]
+    customJs = ["js/custom.js", "https://raw.githubusercontent.com/osvaldasvalutis/disqusLoader.js/master/jquery.disqusloader.js"]
     title = "ROCKTAKEY's Site"
     author = "ROCKTAKEY"
     favicon = "favicons/"

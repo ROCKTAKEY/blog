@@ -37,7 +37,18 @@
     {{ if .Site.DisqusShortname -}}
     <div id="fb_comments_container">
         <h2>{{ i18n "comments" }}</h2>
-        {{ template "_internal/disqus.html" . }}
+        <div id="disqus"></div>
+        <script>
+         disqusLoader('#disqus', {
+             scriptUrl: '//rocktakey.disqus.com/embed.js',
+             disqusConfig: function() {
+                 this.page.title = {{ .Title }};
+                 this.page.url = {{ .Permalink }};
+                 this.page.identifier = {{ .Site.DisqusShortname }};
+             }
+         });
+        </script>
+
     </div>
     {{- end }}
 </div>
