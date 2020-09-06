@@ -273,7 +273,7 @@
 
    というわけで ~tab-bar-display~ というパッケージを作った。
 
-   https://gh-card.dev/repos/ROCKTAKEY/tab-bar-display.svg
+   [[https://gh-card.dev/repos/ROCKTAKEY/tab-bar-display.svg][https://github.com/ROCKTAKEY/tab-bar-display]]
 
    使いかたは簡単で、 ~tab-bar-display-before~ と ~tab-bar-display-after~ に
    ~format-mode-line~ 形式で表示したいものを書いて、 ~tab-bar-display-mode~
