@@ -44,7 +44,7 @@
              disqusConfig: function() {
                  this.page.title = {{ .Title }};
                  this.page.url = {{ .Permalink }};
-                 this.page.identifier = {{ .Site.DisqusShortname }};
+                 this.page.identifier = {{ .Permalink }};
              }
          });
         </script>
