@@ -58,6 +58,9 @@ disqusShortname = "rocktakey"
 [[params.sponsorIcons]]
     icon = "fa-heart"
     url = "https://github.com/sponsors/ROCKTAKEY"
+[[params.sponsorIcons]]
+    icon = "fa-patreon"
+    url = "https://patreon.com/rocktakey"
 
 [menu]
     [[menu.main]]
