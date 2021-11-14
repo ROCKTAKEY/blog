@@ -471,11 +471,21 @@ $ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointMana
    ~grugru~ を実行して、やっぱりこれは違うな、と思ったとき、その場でサクっと再定義できると便利ですよね。
    設定ファイルにこだわりがない場合は、 ~grugru-edit~ を利用するとよいです。現在のカーソルで有効な、
    ~grugru-define-global~ と ~grugru-define-on-major-mode~ で定義した ~grugru~ を再定義できます。
-   ここで再定義した値は、 ~init.el~ に
+   ここで再定義した値は ~grugru-edit-save-file~ に保存されます。
+   ~init.el~ に以下のような記述をすれば、その設定は次回起動時にも読み込まれます。
    #+begin_src emacs-lisp :tangle yes
      (grugru-edit-load)
    #+end_src
-   を書いていた場合、永続化されます。
+   保存されたファイルは単なるEmacs Lispの式ですので、気に入らないことがあれば手で編集しても構いません。
+
+   ただし、これを使うと設定が分散してしまうので、 ~init.el~ に設定を集約することにこだわりがある人には
+   おすすめできません。 ~leaf~ のキーワードにも対応していますし、当然直接定義を書いても問題ないので、
+   そういう人は素直に ~init.el~ に書いてください。
+
+   再定義関数は ~grugru-redefine-*~ のような名前になっていて、最後の引数として新しい ~STRING-OR-FUNCTION~
+   を与えることで再定義できます。 ~nil~ を与えれば無効にできます。
+   ~init.el~ に直接書く場合、自分で定義したものは書き換えれば済むので、
+   主にデフォルトの挙動を変えたいときに使うことになりそうです。
 
 ** 独立した ~grugru~ を定義する
    ここまで、なるべく負荷を減らすべく、 ~grugru~ という単一のコマンドによって ~thing~ の置換を
@@ -492,14 +502,14 @@ $ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointMana
       (symbol . ("solid" "liquid" "gas")))
    #+end_src
 
-** まとめ
+** 結論
    ここに書ききれていないことも多々ありますので、詳細は[[https://github.com/ROCKTAKEY/grugru#readme][README.org]]
    を見てね!!みなさんも ~grugru~ といっしょに、ストレスのないコーディングを楽しみましょう!!
 
 ** お願い
-   私の知らない言語では、どのような ~thing~ が置換されうるのかが分からないため、デフォルトが
+   私があまり知らない言語では、どのような ~thing~ が置換されうるのかが分からないため、デフォルトが
    あまり充実していないのが現状です。issueでもPRでも、SlackやTwitterのDMでも構いませんし、
-   フォーマットの有無や日本語英語も問いませんので、どの言語にどのような ~grugru~ できそうな
-   ペアがあるか、教えていただけると嬉しいです。
+   フォーマットの有無や日本語英語も問いませんので、どの言語(どれかひとつの言語で構いません)に
+   どのような ~grugru~ できそうなペアがあるか(1つだけでも構いません)、教えていただけると嬉しいです。
 
    あと、良かったら投げ銭してってね!
