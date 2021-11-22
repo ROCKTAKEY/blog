@@ -400,7 +400,7 @@ $ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointMana
      (grugru-define-local 'char '("a" "b" "c"))
      #+end_src
 
-   基本的には、 ~GETTER~ には ~symbol~ (Lispでいう識別子的な意味合い)を選んでおけば大丈夫です。
+   基本的には、 ~GETTER~ には ~symbol~ (Lispにおける識別子的な意味合い)を選んでおけば大丈夫です。
    もし「camelCase」の「camel」の部分だけ、といった ~symbol~ 内の単語を対象にしたい場合は
    ~word~ を、連続する記号類 (~&&~ や ~>>=~ など)を対象にしたい場合は ~non-alphabet~
    を使用します。自前で定義することも可能ですが、高度な内容になるため[[#technical-configuration][高度な内容]]に預けます。
@@ -445,7 +445,7 @@ $ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointMana
         (grugru-define-global 'word '("abcd" "defd" "ghid")))
    #+end_src
 
-   ちなみに、複雑な ~grugru~ にも対応すべく、~GETTER~ や ~STRING-OR-GENERATOR~ には関数を
+   ちなみに、複雑な ~grugru~ にも対応すべく、 ~GETTER~ や ~STRING-OR-GENERATOR~ には関数を
    与えることが可能になっています。詳細はここでは省きますが、
    ~GETTER~ は引数なしでカーソル位置から ~thing~ の始点と終点のコンスセルを返し、
    ~STRING-OR-GENERATOR~ は第一引数として貰った候補が有効なら次の候補(第二引数が ~non-nil~ なら前の候補)
