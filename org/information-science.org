@@ -317,7 +317,8 @@ $ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointMana
   最初のスクリプトとなんの差があったのかはわからないが、無事インストールできた。
   よかった。
 
-* TODO grugru.el ― カーソル下のthingをじゅんぐりに入れ替える
+* DONE grugru.el ― カーソル下のthingをじゅんぐりに入れ替える
+CLOSED: [2021-11-30 Tue 23:59]
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2021-eb9f86f0-ee65-1824-4063-ed0d0ba15dbf
   :EXPORT_HUGO_TAGS: Emacs Emacs-Lisp grugru
