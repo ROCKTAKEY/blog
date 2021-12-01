@@ -26,6 +26,18 @@ p {
     font-size: 16px;
 }
 
+@media screen and (min-width: 960px){
+    .sidebar{
+        width: 30%;
+    }
+    .content{
+        width: 70%;
+    }
+    .page-top{
+        width: 70%;
+    }
+}
+
 .sidebar .social-links a {
     color: var(--nav-text-color);
 }
