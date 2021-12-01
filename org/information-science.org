@@ -409,7 +409,8 @@ CLOSED: [2021-11-30 Tue 23:59]
    もし大文字小文字の情報を無視して定義したい場合は、 ~STRINGS-OR-GENERATOR~ に以下のように
    書けばよいです。
    #+begin_src emacs-lisp :tangle yes
-     (grugru-define-global 'word '("aaa" "bbb" "ccc"))
+     ;; 誤植があったためコードを修正しました
+     (grugru-define-global 'word (grugru-metagenerator-keep-case '("aaa" "bbb" "ccc")))
      ;; AAA -> BBB -> CCC のような `grugru' が可能!
    #+end_src
    実は ~STRINGS-OR-GENERATOR~ には ~GENERATOR~ と呼ばれる関数を書くことができますが、
