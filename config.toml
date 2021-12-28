@@ -50,7 +50,7 @@ disqusShortname = "rocktakey"
     url = "https://twitter.com/rocktakey"
 [[params.socialIcons]]
     icon = "fa-envelope-o"
-    url = "rocktakey@gmail.com"
+    url = "mailto:rocktakey@gmail.com"
 
 [[params.sponsorIcons]]
     icon = "fa-amazon"
