@@ -1,0 +1,103 @@
+languageCode: "ja"
+DefaultContentLanguage: "ja"
+hasCJKLanguage: true
+title: "ROCKTAKEY's Site"
+
+enableRobotsTXT: true
+
+pygmentsUseClasses: true
+pygmentsCodefences: true
+
+theme: "hugo-PaperMod"
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+
+taxonomies:
+  tag: "tags"
+
+params:
+  profilePicture: "images/logo.png"
+  title: "ROCKTAKEY's Site"
+  author: "ROCKTAKEY"
+  favicon: "favicons/"
+  images: ["images/twitter-card.png"]
+  dateformat: "2006-1-2"
+  ShowCodeCopyButtons: true
+  ShowPostNavLinks: true
+  ShowShareButtons: true
+
+  label:
+    icon: "/images/logo.png"
+
+  defaultTheme: dark
+
+  mainSections:
+    - "diary"
+    - "information-science"
+    - "mathematics"
+    - "medicine-biology"
+    - "physics"
+
+  homeInfoParams:
+    Title: "ROCKTAKEY's site"
+    Content: "Love Emacs, major medical biology, study mathematics and physics. "
+
+  ShowToc: true
+  ShowBreadCrumbs: true
+
+  socialIcons:
+    - name: "GitHub"
+      icon: "fab fa-github"
+      url: "https://github.com/ROCKTAKEY"
+    - name: "Twitter"
+      icon: "fab fa-twitter"
+      url: "https://twitter.com/rocktakey"
+    - name: "Mail"
+      icon: "far fa-envelope"
+      url: "mailto:rocktakey@gmail.com"
+    - name: "Amazon Wishlist"
+      icon: "fab fa-amazon"
+      url: "https://www.amazon.jp/hz/wishlist/ls/19PQEBYE2EL1O?ref_=wl_share"
+    - name: "GitHub Sponsor"
+      icon: "fas fa-heart"
+      url: "https://github.com/sponsors/ROCKTAKEY"
+    - name: "Patreon"
+      icon: "fab fa-patreon"
+      url: "https://patreon.com/rocktakey"
+
+menu:
+  main:
+    - name: "Home"
+      url: "/"
+      weight: 1
+    - name: "Diary"
+      url: "/Diary/"
+      weight: 2
+    - name: "Information Science"
+      url: "/information-science/"
+      weight: 5
+    - name: "Medicine/Biology"
+      url: "/medicine-biology/"
+      weight: 10
+    - name: "Mathematics"
+      url: "/mathematics/"
+      weight: 15
+    - name: "Physics"
+      url: "/physics/"
+      weight: 20
+    - name: "Tags"
+      url: "/tags/"
+      weight: 100
+    - name: "Archives"
+      url: "/archives/"
+    - name: "Search"
+      url: "/search/"
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
