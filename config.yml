@@ -28,6 +28,7 @@ params:
   ShowCodeCopyButtons: true
   ShowPostNavLinks: true
   ShowShareButtons: true
+  env: production
 
   label:
     icon: "/images/logo.png"
