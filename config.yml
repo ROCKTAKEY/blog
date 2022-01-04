@@ -23,12 +23,15 @@ params:
   title: "ROCKTAKEY's Site"
   author: "ROCKTAKEY"
   favicon: "favicons/"
-  images: ["/images/twitter-card.png"]
   dateformat: "2006-1-2"
   ShowCodeCopyButtons: true
   ShowPostNavLinks: true
   ShowShareButtons: true
   env: production
+
+  cover:
+    image:
+      "/images/twitter-card.png"
 
   label:
     icon: "/images/logo.png"
