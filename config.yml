@@ -1,3 +1,5 @@
+baseURL: "https://rocktakey.netlify.app"
+
 languageCode: "ja"
 DefaultContentLanguage: "ja"
 hasCJKLanguage: true
@@ -29,7 +31,6 @@ params:
   ShowCodeCopyButtons: true
   ShowPostNavLinks: true
   ShowShareButtons: true
-  env: production
 
   label:
     icon: "/images/logo.png"
