@@ -23,7 +23,7 @@ params:
   title: "ROCKTAKEY's Site"
   author: "ROCKTAKEY"
   favicon: "favicons/"
-  images: ["images/twitter-card.png"]
+  images: ["/images/twitter-card.png"]
   dateformat: "2006-1-2"
   ShowCodeCopyButtons: true
   ShowPostNavLinks: true
