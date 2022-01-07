@@ -32,6 +32,8 @@ params:
   ShowPostNavLinks: true
   ShowShareButtons: true
 
+  comments: true
+
   label:
     icon: "/images/logo.png"
 
