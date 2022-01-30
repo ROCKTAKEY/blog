@@ -619,3 +619,91 @@ CLOSED: [2021-11-30 Tue 23:59]
    どのような ~grugru~ できそうなペアがあるか(1つだけでも構いません)、教えていただけると嬉しいです。
 
    あと、良かったら投げ銭してってね!
+
+* DONE Surface Laptop 1にUbuntuを(LUKSによる暗号化つきで)インストールする
+CLOSED: [2022-01-31 Mon 02:50]
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2022-27ba711f-28e9-35b4-5c13-5fb121b8023d
+  :END:
+基本的には[[#surface-linux-reference][参考]]にあるサイトに準拠しています。
+** 必要なもの
+- USBハブ (USB端子が1つしかないため、以下の2つを同時に接続するために必要)
+- USBキーボード (途中までSurfaceにもとからついているキーボードは使えません)
+- USBメモリ (Ubuntuのブート用)
+
+** ブート用のUbuntuをUSBメモリに用意する
+基本[[https://zenn.dev/sprout2000/articles/52caaffa9ad3fa#1.-usb-%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%83%87%E3%82%A3%E3%82%B9%E3%82%AF%E3%81%AE%E4%BD%9C%E6%88%90][ここ]]のとおりにやればよい。あらかじめ作っておいてある人もいそう。ここ以外にもたくさん文献があると思うので
+ここでは説明しない。
+
+** UEFIでセキュアブートを無効にする
+音量アップボタン(F6)を押しつづけながら、電源を入れる。
+もしくは、Windowsを立ち上げて「設定>更新とセキュリティ>PCの起動をカスタマイズする>今すぐ再起動>
+トラブルシューティング>詳細オプション>UEFIファームウェアの設定」と行く。UEFIは、BIOSの進化版みたいな
+ものらしい。
+
+UEFIに入ったら、「Security>Secure Boot>Change configuration」をクリックして、「Microsoft only」から
+「None」に変更する。LUKSで暗号化すればどうせSSDの中身はパスワードなくして読めないので、
+セキュアブートはなくても問題ない気がしている(本当か？)。
+後でLUKSのパスワードを求められたときには堅牢なパスワードにしておきましょう。
+
+最後に、Boot configurationタブで、USB Storageを一番上にもっていく。これで、Windowsではなく
+USBにあるUbuntuが先に立ち上がるようになる。
+
+** Ubuntuを起動する
+まず、SurfaceにUbuntuの入ったUSBとキーボードを、USBハブ経由で繋ぐ。
+そして、「exit>Restart now」すると、Ubuntuが立ち上がる。
+
+** Ubuntuをインストール
+基本は下記のURLに従ってもらえればいいが、暗号化するのに注意がある。
+「インストールの種類」のタイミングで、「ディスクを削除してUbuntuをインストール」すると思うが、
+ここで「高度な機能」をクリックし、「新しいUbuntu」の「インストールにLVMを使用する」を選択し、
+「安全のために新しいUbuntuのインストールを暗号化する」にチェックを入れて欲しい。
+これで、bitlockerと同様にディスクが暗号化される。
+
+URLは[[https://linuxfan.info/ubuntu-20-04-install-guide][これ]]。「ストレージ設定」の見出しのところに
+その画面がある。この記事では暗号化をしていないので、一切触れられていない。
+この後パスワードを入力させられる(パスワードなしでもいけるが、セキュアブートなしだと危うそう)。
+そのとき、バックアップキーが表示されるので、パスワードを忘れたときのためにどこかにメモっておく。
+
+** Surface用のカーネルを導入
+次に、Surfaceの各種デバイスが使えるよう、専用のカーネルをインストールする。
+基本は[[https://github.com/linux-surface/linux-surface/wiki/Installation-and-Setup#debian--ubuntu][ここ]]に買いてある通りでよい。ただし、
+#+BEGIN_SRC shell -n
+  sudo apt install linux-surface-secureboot-mok
+  sudo update-grub
+#+END_SRC
+に関しては、セキュアブートしないのならば必要ない。
+私はこれを実行した上で、UEFIにおいてセキュアブートを「Microsoft and 3rd party CA」としても
+セキュアブートできなかったので断念した。余力があればチャレンジしてほしい。
+
+** キーボードをLUKSパスワード入力時にも使えるようにする
+このまま再起動すると、起動時にLUKSのパスワードを聞かれる。
+しかし、その時点で読み込まれるファイルシステムはSurfaceのキーボードのドライバを含んでいないらしく、
+外部キーボードでしか入力できない。これでは使いものにならないので、最初に読まれるモジュールを追加する。
+
+エディタは問わないが、 =/etc/initramfs-tools/modules= を開いて、以下を末尾に追加する。
+root権限が必要なので注意。
+#+BEGIN_SRC shell -n
+  surface_aggregator
+  surface_aggregator_registry
+  surface_hid_core
+  surface_hid
+  intel_lpss
+  intel_lpss_pci
+  8250_dw
+#+END_SRC
+その後、以下を実行する。こちらも ~sudo~ が必要。
+#+BEGIN_SRC shell -n
+update-initramfs -u
+#+END_SRC
+
+** おわり
+あとは再起動すれば、SurfaceのロゴとともにLUKSのパスワードを聞かれるので、Surface備え付けのキーボードで
+パスワードを打てることがわかる。
+
+** 参考
+:PROPERTIES:
+:CUSTOM_ID: surface-linux-reference
+:END:
+- https://zenn.dev/sprout2000/articles/52caaffa9ad3fa
+- https://github.com/linux-surface/linux-surface
