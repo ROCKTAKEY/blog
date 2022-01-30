@@ -682,7 +682,7 @@ URLは[[https://linuxfan.info/ubuntu-20-04-install-guide][これ]]。「スト�
 外部キーボードでしか入力できない。これでは使いものにならないので、最初に読まれるモジュールを追加する。
 
 エディタは問わないが、 =/etc/initramfs-tools/modules= を開いて、以下を末尾に追加する。
-root権限が必要なので注意。
+root権限が必要なので注意。ちなみに、このリストは[[https://github.com/linux-surface/linux-surface/wiki/Disk-Encryption][ここ]]からとってきた。
 #+BEGIN_SRC shell -n
   surface_aggregator
   surface_aggregator_registry
