@@ -624,6 +624,7 @@ CLOSED: [2021-11-30 Tue 23:59]
 CLOSED: [2022-01-31 Mon 02:50]
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-27ba711f-28e9-35b4-5c13-5fb121b8023d
+  :EXPORT_HUGO_TAGS: Surface-Laptop-1 Ubuntu LUKS
   :END:
 基本的には[[#surface-linux-reference][参考]]にあるサイトに準拠しています。
 ** 必要なもの
@@ -707,3 +708,37 @@ update-initramfs -u
 :END:
 - https://zenn.dev/sprout2000/articles/52caaffa9ad3fa
 - https://github.com/linux-surface/linux-surface
+* DONE 電子書籍リーダで読みやすくするために、サイズを変えずにPDFの余白をバッサリとる
+CLOSED: [2022-02-01 Tue 17:43]
+:PROPERTIES:
+  :EXPORT_FILE_NAME: 2022-d37970ce-9dcd-6534-422b-1df7983164bc
+:EXPORT_HUGO_TAGS: PDF e-book
+:END:
+** 結論
+下記URLにある =pdfcrop.sh= をつかう。 =pdfcrop.sh -m 0 input.pdf output.pdf= 。
+https://tex.stackexchange.com/questions/42236/pdfcrop-generates-larger-file
+
+** はじめに
+電子書籍リーダで読む場合、LaTeXで吐いたPDFとかだと、あきらかに余白が大きい。
+製本するならそれでもよいが、電子書籍リーダで読むなら余白は邪魔なだけだ。
+これをばっさりなくしたい。
+
+** pdfcrop
+余白をバッサリとってくれるツールとして、 =pdfcrop= というものがある。
+TeX系のユーティリティとしてついてくる。しかしこのツールには問題があり、
+ページ数の多いものなど、一部のPDFを異常に大きなサイズとしてしまう。
+Send-to-kindleだと50MBまでしか送れないし、そもそも電子書籍リーダはたいして容量がないので、
+あまりよろしくない。ちなみに私が使ったときはサイズが20倍とかに膨れ上がった。
+
+** 解決
+解決法をさがしていたところ、以下のStackExchangeに出会った。
+
+https://tex.stackexchange.com/questions/42236/pdfcrop-generates-larger-file
+
+ここに載っている =pdfcrop.sh= を保存して使うと、みごとに余白を削れた。もちろんサイズは変わっていない。
+丁寧に作られていて、helpもあるので詳しくはそれを参照してほしいが、基本的な使いかたは、 ~-m~ で
+空白(margin)のサイズを指定し、引数として入力PDFと出力PDFを与える。
+余白をまったくなくしたければ、 =pdfcrop.sh -m 0 input.pdf output.pdf= とすればよい。
+
+** おわりに
+ま、まだ電子書籍リーダもってないんですけどね。Fire HD 8しかない。おすすめおしえてほしい。
