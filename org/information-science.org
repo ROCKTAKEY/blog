@@ -742,3 +742,7 @@ https://tex.stackexchange.com/questions/42236/pdfcrop-generates-larger-file
 
 ** おわりに
 ま、まだ電子書籍リーダもってないんですけどね。Fire HD 8しかない。おすすめおしえてほしい。
+* TODO GNU Guix Systemをインストールする
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2022-ea617625-23b7-03b4-5273-69d79d393b85
+  :END:
