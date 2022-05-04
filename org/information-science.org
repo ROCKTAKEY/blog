@@ -746,3 +746,196 @@ https://tex.stackexchange.com/questions/42236/pdfcrop-generates-larger-file
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-ea617625-23b7-03b4-5273-69d79d393b85
   :END:
+** はじめに
+GNU Guix System(以下Guix System)とは、GNUの開発するLinuxディストロのひとつで、GNU Guix(以下Guix)という
+パッケージマネージャと密結合している。GuixはSchemeで管理できるパッケージマネージャで、
+隔離された環境によるビルドやロールバック可能な操作が特徴で、再現性と環境の隔離に重点を置いている。
+これをWindowsの入ったx64のPCにインストールする。面倒なので新しいディスクを用意してそちらにインストールした。
+Windowsのディスクはそのまま残したので、起動時にF12を連打してブートディスクを選択すればWindowsも起動できる。
+
+** 必要なもの
+- インストール先のPC :: 私はWindows 10、Bitlockerで暗号化されたディスクの組み合わせのPCにインストールした。
+- USBメモリかDVDドライブ :: インストールディスクを一時的に作る必要がある。容量は8GBあれば余裕だと思う(たぶん2GBもない)。
+- 内蔵SSDかHDD :: 必須ではないが、Windowsと共存させたい場合、ディスクを分けるのが最も楽。元のWindowsを潰してよいなら
+  そこに上書きすればよいと思うが、保証はできない。あんまりやらないけど、外付けでも同様にできるとは思う。
+
+** ディスクの準備
+私はWindowsユーザーなので、Rufusを使ってUSBにインストールディスクを作成した。LinuxのPCがある場合は
+[[https://guix.gnu.org/manual/en/html_node/USB-Stick-and-DVD-Installation.html][公式のドキュメント]]のとおりにやるとよいと思います。
+
+まず、[[https://guix.gnu.org/ja/download/][公式サイト]]からGNU Guix SystemのISOファイルをダウンロードして、適当なUSBメモリやDVDに焼く。
+
+Rufusでディスクイメージを作る際に注意点がある。
+ISOモードではなくDDモードで焼いてほしい。そうしないとちゃんとbootできない。
+これはRufusのはじめの画面では選択できず、「スタート」を押した後に聞いてくるので、
+そのときに「ISOモード(推奨)」ではなく「DDモード」を選択して欲しい。
+
+** ブートディスクの変更
+PCのメーカーや購入時期によって違うと思うので詳しい説明は省く。
+先程作ったインストールディスクからブートされるよう、BIOSやUEFIの設定を変えておけばよい。
+
+** GUI(風)インストーラでインストール
+あんまり需要はないかもしれないが、言葉だけだとわかりにくいかもしれないので、画像を付けておく。
+
+さて、インストールディスクからのブートが成功すると、以下のような画面が得られる。
+Locale languageなので「日本語」を選択。ちなみに日本語を選んでもインストーラは英語のまま。
+#+caption: Locale language
+#+attr_latex: scale=0.75
+#+label: fig:locale-language
+[[images:locale-language.png]]
+
+次に、Locale locationで「日本」を選択。
+#+caption: Locale location
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:locale-location.png]]
+
+ここでインストーラの選択画面が表れる。GUI風のインストーラを使いたいので
+「Graphical install using a terminal based interface」を選択。
+#+caption: GNU Guix install
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:gnu-guix-install.png]]
+
+タイムゾーンを「Asia」「Tokyo」と選択。
+#+caption: Timezoneの大まかな地域選択
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:timezone-1.png]]
+#+caption: Timezoneの選択
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:timezone-2.png]]
+
+次にキーボードレイアウトを選択。日本語配列なら「日本語」を選択。
+#+caption: (キーボードの)Layout
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:layout.png]]
+
+キーボードレイアウトにもバリエーションがあるので、それを選択。
+こだわりがなければ「日本語」にしておけばよい。
+#+caption: (キーボードレイアウトの)Variant
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:variant.png]]
+
+PCの名前を入力する。
+#+caption: Hostname
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:hostname.png]]
+
+代替サーバの検索を有効にするか選択。
+このオプションをオンにすると、LAN内のサーバからビルド済みバイナリを探して、インストールでそれも利用するようにする。
+これをオンにすればダウンロードの速度の向上が期待される。(おそらくハッシュ値を利用して)純正であると確認された
+ものだけを使うので、セキュリティリスクはないが、盗聴している人がいる場合はなにをインストールしているか見ることが
+できる。
+#+caption: Substitute server discovory.
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:substitute-server-discovory.png]]
+
+rootのパスワードを入力。ある程度強いものにしておきましょう。
+#+caption: System administrator password
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:system-administrator-password.png]]
+#+caption: (System administrator passwordの) Password confirmation required
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:password-confirmation-required.png]]
+
+ユーザの作成。 =TAB= キーで「Add」を選択し、 =Enter= してユーザ情報を入力。「Name」がユーザ名になる。
+#+caption: User creation
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:user-creation-1.png]]
+
+#+caption: User creation(新規追加画面)
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:user-creation-2.png]]
+
+#+caption: User creation(パスワードの確認)
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:user-creation-password-confirm-required.png]]
+
+#+caption: User creation(ユーザ追加後)
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:user-creation-3.png]]
+
+デスクトップ環境を選択。=SPC= でチェックをつけられる。
+複数選択可なので、今後使ってみたいものは気軽に入れてしまってもいいかも。
+複数選んでもデフォルトは勝手にGNOMEになったので、違うものを入れてしまって戸惑うみたいなことには
+ならなそう。私はとりあえずデフォルトの「GNOME」と今後使ってみたい「Emacs EXWM」を追加した。
+#+caption: Desktop environment
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:desktop-environment.png]]
+
+ネットワークサービスを選択。基本はデフォルトのままでよさそう。
+SSHで外から入りたい場合はOpenSSHのデーモンを有効にしないといけないかもしれない(よくしらない)。
+#+caption: Network service
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:network-service.png]]
+
+パーティションをどのように切るかの流れを選択。パーティションとは、ざっくり言えばディスクの切り分けのこと(なはず)。
+よく知らない場合は、「Guided - using the entire disk」か「Guided using the entire disk with encryption」
+を選んでおくとよい。後者を選ぶとディスクが暗号化される。立ち上げる前にパスワードを要求されるようになるが、
+ディスクを盗まれたり廃棄したり警察に押収されたりしたときに中身を勝手に見られることを防ぐことができるので、
+なるべくこちらを選ぶことをおすすめする。ここでも後者を選択する。
+「Manual」にすれば、一つのディスクで複数のOSを取り回せると思うが、試していない。上級者向け。
+#+caption: Partitioning method
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:partitioning-method.png]]
+
+使うディスクを選択。ここで間違ったディスクを選択するとそのディスクの中身は二度と戻りません。慎重に選びましょう。
+#+caption: Disk
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:disk-2.png]]
+
+パーティションの切り方を選択。といってもhomeディレクトリを別のパーティションとして切るか否かを聞いている。
+homeディレクトリを分けることによって、今回のようにOSをインストールする際にhome以下のデータをそのままとっておける。
+私はそこまで魅力を感じなかった(それよりもパーティションが分かれることによる管理コストのほうが面倒そう)ので、
+「Everything is one partition」を選択。
+#+caption: Partition scheme
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:partition-scheme.png]]
+
+最後の確認。選択したディスクが消えてもよいディスクかしっかり確認して、「OK」を選択。
+#+caption: Guided partitioning
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:guided-partitioning.png]]
+
+ディスクの暗号化に使うパスワードを入力。これもそこそこの長さにしておこう。
+ディスクに対するパスワードなので、ネットワーク経由の攻撃とは違い、総当たりに対してソフトウェア的なブロックは見込めない。
+総当たりされても一生解読されないくらいの長さにしましょう。
+#+caption: (ディスク暗号化の)Password required
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:encrypt-password-required.png]]
+#+caption: (ディスク暗号化の)Password confirmation required
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:encrypt-password-confirmation-required.png]]
+
+本当にフォーマットして(パーティション切って)よいか最後の確認。「Continue」を押すと二度と戻れません。
+ここで確認できることは多くないですが、よいと思ったら「Continue」を選択。
+#+caption: Format disk?
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:format-disk.png]]
+
+すると以下の画面になるので、少し待つ。
+#+caption: Preparing partitions
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:preparing-partitions.png]]
