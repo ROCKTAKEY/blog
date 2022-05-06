@@ -742,8 +742,8 @@ https://tex.stackexchange.com/questions/42236/pdfcrop-generates-larger-file
 
 ** おわりに
 ま、まだ電子書籍リーダもってないんですけどね。Fire HD 8しかない。おすすめおしえてほしい。
-* TODO GNU Guix Systemをインストールする
-  :PROPERTIES:
+* TODO GNU Guix Systemをインストールし、日本語を表示・入力できるようにするまで
+:PROPERTIES:
   :EXPORT_FILE_NAME: 2022-ea617625-23b7-03b4-5273-69d79d393b85
   :END:
 ** はじめに
@@ -755,6 +755,7 @@ Windowsのディスクはそのまま残したので、起動時にF12を連打�
 
 ** 必要なもの
 - インストール先のPC :: 私はWindows 10、Bitlockerで暗号化されたディスクの組み合わせのPCにインストールした。
+  注意として、(たぶん)このPCはインターネットに繋がっていなければならない。
 - USBメモリかDVDドライブ :: インストールディスクを一時的に作る必要がある。容量は8GBあれば余裕だと思う(たぶん2GBもない)。
 - 内蔵SSDかHDD :: 必須ではないが、Windowsと共存させたい場合、ディスクを分けるのが最も楽。元のWindowsを潰してよいなら
   そこに上書きすればよいと思うが、保証はできない。あんまりやらないけど、外付けでも同様にできるとは思う。
@@ -773,6 +774,8 @@ ISOモードではなくDDモードで焼いてほしい。そうしないとち
 ** ブートディスクの変更
 PCのメーカーや購入時期によって違うと思うので詳しい説明は省く。
 先程作ったインストールディスクからブートされるよう、BIOSやUEFIの設定を変えておけばよい。
+また、インストールディスクを抜いたらGuix Systemをそのまま立ち上がるよう、
+2番目のブートディスクをこれからインストールするディスクにしておく。
 
 ** GUI(風)インストーラでインストール
 あんまり需要はないかもしれないが、言葉だけだとわかりにくいかもしれないので、画像を付けておく。
@@ -939,3 +942,136 @@ homeディレクトリを分けることによって、今回のようにOSを�
 #+attr_latex: scale=0.75
 #+label: fig:label
 [[images:preparing-partitions.png]]
+
+ここで、はじめてSchemeが出てくる。guixはここに書いてあるとおりにシステムを構築してくれる。
+最初にLocaleとして日本語を選択したが、日本語フォントはOSに含まれていないので、
+このまま進むと豆腐だらけのOSを使うことになる。
+これを防ぐため、システムのconfigureを変更する。 =TAB= で「Edit」を選択。
+#+caption: Configuration file
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:configuration-file-2.png]]
+
+するとnanoというエディタが立ち上がる。
+#+caption: nanoによる =/etc/configure.scm= の編集画面
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:nano-before-region.png]]
+
+そこに、このような節があるはずだ。
+#+BEGIN_SRC scheme -n
+  (pacakges
+   (append
+    (list
+     ;; このへんはEmacs EXWMをDesktop environmentとして選んだときだけ
+     (specification->package "emacs")
+     (specification->package "emacs-exwm")
+     (specification->package
+      "emacs--desktop-environment")
+     (specification->package "nss-certs"))
+    %base-packages))
+#+END_SRC
+ここにはグローバルにインストールされるパッケージが羅列されている。
+この =specification->package= の列にの日本語フォントのパッケージを追加すればよい。
+つまり、以下のように変更する。
+#+BEGIN_SRC scheme -n
+  (pacakges
+   (append
+    (list
+     ;; このへんはEmacs EXWMをDesktop environmentとして選んだときだけ
+     (specification->package "emacs")
+     (specification->package "emacs-exwm")
+     (specification->package
+      "emacs--desktop-environment")
+     (specification->package "nss-certs")
+     (specification->package "fontconfig")
+     (specification->package "font-google-noto"))
+    %base-packages))
+#+END_SRC
+そうしたら、 =C-x= (つまりコントロールを押しながらx)を押し、そのまま =Enter= を押して保存する。
+#+caption: nanoによる =/etc/configure.scm= の編集画面(編集後)
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:nano-after-region.png]]
+
+次の画面が表示されるのでそのまま従って =Enter= を押下。
+#+caption: Press enter to contiunue
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:press-enter-to-continue.png]]
+
+すると、次のようにインストールが始まる。ここでしばらく待機。
+なお、shepherdとは一般的なLinuxにおけるsystemdに相当するもので、サービスマネージャである。
+guix-daemonはguixを走らせるために重要なデーモンで、guixはこれを通じて操作することで管理者権限なしで
+=/gnu/store/= 以下を触ることができる(らしい)。
+#+caption: インストール開始画面
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:console-1.png]]
+
+インストールが終わると、以下のような画面が現れる。指示に従って、 =Enter= を押す。
+#+caption: インストールの終わりの画面
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:console-3.png]]
+
+これでインストールは終了だ。以下のような画面が出てくるので、指示に従い、インストールディスクを
+抜いて再起動する。
+#+caption: Installation complete
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:installation-complete.png]]
+
+** 起動
+再起動すると、GRUBが立ち上がる。GRUBはBoot loaderで、OSの立ち上げを担う。
+私はもともとメインで使っていたディスクをBitlockerで暗号化していたため、
+マスターブートキーを入力させられている。おそらくそうでない人はここでなにも聞かれないのではなかろうか。
+#+caption: マスターブートキーの入力
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:nano-before-region.png]]
+
+その後、以下のようなGRUBのグラフィカルな画面が現れる。ほっておけば先に進むし、 =Enter= を押してもよい。
+#+caption: GRUBのOS選択画面
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:guix-select.png]]
+
+すると、Guix Systemをインストールしたディスクの暗号化のパスワードを聞かれるので、入力。
+#+caption: ディスク暗号化のパスワードを入力
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:decrypt.png]]
+
+これで、Guix Systemが立ち上がる。日本語を表示できることを確認。
+#+caption: Guix Systemのログイン画面
+#+attr_latex: scale=0.75
+#+label: fig:label
+[[images:login.png]]
+
+あとはGNOMEのUIなので、普通にログインできるだろう。
+
+** 日本語を表示したい
+今、日本語を表示できることを確認した。
+このままGuix Systemに一切のカスタマイズを加えるつもりがないのならば、この章は飛ばしても構わない。
+しかし、おそらくGuix Systemを使う人は、ほとんど全員カスタマイズしたくなる性分の人だろう。
+また、ひとつ後の章では =guix= コマンドによるパッケージのインストールも扱うので、
+もしエディタにEmacsを使いたいという場合は、この章を後回しにするとよい。
+
+実は今日本語が表示できているのが奇跡な状態である。
+詳細はわかっていないが、インストール時特有のプロセスによって日本語が表示できている。
+カスタマイズしたくなり、 =guix system reconfigure /etc/config.scm= したあかつきには、
+もれなく文字が豆腐になった無惨なGuix System(というかGNOME)を見ることになる。
+これを解決するため、 =/var/lib/gdm/.config/fontconfig/fonts.conf= を作成し、以下のように書く。
+場所的にルート権限が必要なので注意。
+特にこだわりがなければ =sudo nano /var/lib/gdm/.config/fontconfig/fonts.conf=
+#+BEGIN_SRC xml -n
+  <?xml version='1.0'?>
+  <!DOCTYPE fontconfig SYSTEM 'fonts.dtd'>
+  <fontconfig>
+    <dir>/run/current-system/profile/share/fonts/</dir>
+  </fontconfig>
+#+END_SRC
+
+gdmとはGNOME Display Managerのことであり、内部的なユーザとして扱われている。
+しかしこいつはグローバルにインストールされたフォントの場所を知らないため、これを教えてあげようというわけだ。
