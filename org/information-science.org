@@ -745,8 +745,9 @@ https://tex.stackexchange.com/questions/42236/pdfcrop-generates-larger-file
 * DONE GNU Guix Systemをインストールし、日本語を表示・入力できるようにするまで
 CLOSED: [2022-05-07 Sat 05:20]
 :PROPERTIES:
-  :EXPORT_FILE_NAME: 2022-ea617625-23b7-03b4-5273-69d79d393b85
-  :END:
+:EXPORT_FILE_NAME: 2022-ea617625-23b7-03b4-5273-69d79d393b85
+:EXPORT_HUGO_TAGS: GNU-Guix-System GNU-Guix IME
+:END:
 ** はじめに
 GNU Guix System(以下Guix System)とは、GNUの開発するLinuxディストロのひとつで、GNU Guix(以下Guix)という
 パッケージマネージャと密結合している。GuixはSchemeで管理できるパッケージマネージャで、
