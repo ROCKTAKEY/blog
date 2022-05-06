@@ -742,7 +742,8 @@ https://tex.stackexchange.com/questions/42236/pdfcrop-generates-larger-file
 
 ** おわりに
 ま、まだ電子書籍リーダもってないんですけどね。Fire HD 8しかない。おすすめおしえてほしい。
-* TODO GNU Guix Systemをインストールし、日本語を表示・入力できるようにするまで
+* DONE GNU Guix Systemをインストールし、日本語を表示・入力できるようにするまで
+CLOSED: [2022-05-07 Sat 05:20]
 :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-ea617625-23b7-03b4-5273-69d79d393b85
   :END:
@@ -790,43 +791,43 @@ Locale languageなので「日本語」を選択。ちなみに日本語を選�
 次に、Locale locationで「日本」を選択。
 #+caption: Locale location
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:locale-location
 [[images:locale-location.png]]
 
 ここでインストーラの選択画面が表れる。GUI風のインストーラを使いたいので
 「Graphical install using a terminal based interface」を選択。
 #+caption: GNU Guix install
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:gnu-guix-install
 [[images:gnu-guix-install.png]]
 
 タイムゾーンを「Asia」「Tokyo」と選択。
 #+caption: Timezoneの大まかな地域選択
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:timezone-1
 [[images:timezone-1.png]]
 #+caption: Timezoneの選択
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:timezone-2
 [[images:timezone-2.png]]
 
 次にキーボードレイアウトを選択。日本語配列なら「日本語」を選択。
 #+caption: (キーボードの)Layout
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:layout
 [[images:layout.png]]
 
 キーボードレイアウトにもバリエーションがあるので、それを選択。
 こだわりがなければ「日本語」にしておけばよい。
 #+caption: (キーボードレイアウトの)Variant
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:variant
 [[images:variant.png]]
 
 PCの名前を入力する。
 #+caption: Hostname
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:hostname
 [[images:hostname.png]]
 
 代替サーバの検索を有効にするか選択。
@@ -836,38 +837,38 @@ PCの名前を入力する。
 できる。
 #+caption: Substitute server discovory.
 #+attr_latex: scale=0.75
-#+label: fig:label
-[[images:substitute-server-discovory.png]]
+#+label: fig:substitute-server-discovery
+[[images:substitute-server-discovery.png]]
 
 rootのパスワードを入力。ある程度強いものにしておきましょう。
 #+caption: System administrator password
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:system-administrator-password
 [[images:system-administrator-password.png]]
 #+caption: (System administrator passwordの) Password confirmation required
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:password-confirmation-required
 [[images:password-confirmation-required.png]]
 
 ユーザの作成。 =TAB= キーで「Add」を選択し、 =Enter= してユーザ情報を入力。「Name」がユーザ名になる。
 #+caption: User creation
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:user-creation-1
 [[images:user-creation-1.png]]
 
 #+caption: User creation(新規追加画面)
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:user-creation-2
 [[images:user-creation-2.png]]
 
 #+caption: User creation(パスワードの確認)
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:user-creation-password-confirm-required
 [[images:user-creation-password-confirm-required.png]]
 
 #+caption: User creation(ユーザ追加後)
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:user-creation-3
 [[images:user-creation-3.png]]
 
 デスクトップ環境を選択。=SPC= でチェックをつけられる。
@@ -876,14 +877,14 @@ rootのパスワードを入力。ある程度強いものにしておきまし�
 ならなそう。私はとりあえずデフォルトの「GNOME」と今後使ってみたい「Emacs EXWM」を追加した。
 #+caption: Desktop environment
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:desktop-environment
 [[images:desktop-environment.png]]
 
 ネットワークサービスを選択。基本はデフォルトのままでよさそう。
 SSHで外から入りたい場合はOpenSSHのデーモンを有効にしないといけないかもしれない(よくしらない)。
 #+caption: Network service
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:network-service
 [[images:network-service.png]]
 
 パーティションをどのように切るかの流れを選択。パーティションとは、ざっくり言えばディスクの切り分けのこと(なはず)。
@@ -894,13 +895,13 @@ SSHで外から入りたい場合はOpenSSHのデーモンを有効にしない�
 「Manual」にすれば、一つのディスクで複数のOSを取り回せると思うが、試していない。上級者向け。
 #+caption: Partitioning method
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:partitioning-method
 [[images:partitioning-method.png]]
 
 使うディスクを選択。ここで間違ったディスクを選択するとそのディスクの中身は二度と戻りません。慎重に選びましょう。
 #+caption: Disk
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:disk-2
 [[images:disk-2.png]]
 
 パーティションの切り方を選択。といってもhomeディレクトリを別のパーティションとして切るか否かを聞いている。
@@ -909,13 +910,13 @@ homeディレクトリを分けることによって、今回のようにOSを�
 「Everything is one partition」を選択。
 #+caption: Partition scheme
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:partition-scheme
 [[images:partition-scheme.png]]
 
 最後の確認。選択したディスクが消えてもよいディスクかしっかり確認して、「OK」を選択。
 #+caption: Guided partitioning
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:guided-partitioning
 [[images:guided-partitioning.png]]
 
 ディスクの暗号化に使うパスワードを入力。これもそこそこの長さにしておこう。
@@ -923,24 +924,24 @@ homeディレクトリを分けることによって、今回のようにOSを�
 総当たりされても一生解読されないくらいの長さにしましょう。
 #+caption: (ディスク暗号化の)Password required
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:encrypt-password-required
 [[images:encrypt-password-required.png]]
 #+caption: (ディスク暗号化の)Password confirmation required
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:encrypt-password-confirmation-required
 [[images:encrypt-password-confirmation-required.png]]
 
 本当にフォーマットして(パーティション切って)よいか最後の確認。「Continue」を押すと二度と戻れません。
 ここで確認できることは多くないですが、よいと思ったら「Continue」を選択。
 #+caption: Format disk?
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:format-disk
 [[images:format-disk.png]]
 
 すると以下の画面になるので、少し待つ。
 #+caption: Preparing partitions
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:preparing-partitions
 [[images:preparing-partitions.png]]
 
 ここで、はじめてSchemeが出てくる。guixはここに書いてあるとおりにシステムを構築してくれる。
@@ -949,13 +950,13 @@ homeディレクトリを分けることによって、今回のようにOSを�
 これを防ぐため、システムのconfigureを変更する。 =TAB= で「Edit」を選択。
 #+caption: Configuration file
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:configuration-file-2
 [[images:configuration-file-2.png]]
 
 するとnanoというエディタが立ち上がる。
 #+caption: nanoによる =/etc/configure.scm= の編集画面
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:nano-before-region
 [[images:nano-before-region.png]]
 
 そこに、このような節があるはずだ。
@@ -991,13 +992,13 @@ homeディレクトリを分けることによって、今回のようにOSを�
 そうしたら、 =C-x= (つまりコントロールを押しながらx)を押し、そのまま =Enter= を押して保存する。
 #+caption: nanoによる =/etc/configure.scm= の編集画面(編集後)
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:nano-after-region
 [[images:nano-after-region.png]]
 
 次の画面が表示されるのでそのまま従って =Enter= を押下。
 #+caption: Press enter to contiunue
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:press-enter-to-continue
 [[images:press-enter-to-continue.png]]
 
 すると、次のようにインストールが始まる。ここでしばらく待機。
@@ -1006,20 +1007,20 @@ guix-daemonはguixを走らせるために重要なデーモンで、guixはこ�
 =/gnu/store/= 以下を触ることができる(らしい)。
 #+caption: インストール開始画面
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:console-1
 [[images:console-1.png]]
 
 インストールが終わると、以下のような画面が現れる。指示に従って、 =Enter= を押す。
 #+caption: インストールの終わりの画面
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:console-3
 [[images:console-3.png]]
 
 これでインストールは終了だ。以下のような画面が出てくるので、指示に従い、インストールディスクを
 抜いて再起動する。
 #+caption: Installation complete
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:installation-complete
 [[images:installation-complete.png]]
 
 ** 起動
@@ -1028,25 +1029,25 @@ guix-daemonはguixを走らせるために重要なデーモンで、guixはこ�
 マスターブートキーを入力させられている。おそらくそうでない人はここでなにも聞かれないのではなかろうか。
 #+caption: マスターブートキーの入力
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:nano-before-region
 [[images:nano-before-region.png]]
 
 その後、以下のようなGRUBのグラフィカルな画面が現れる。ほっておけば先に進むし、 =Enter= を押してもよい。
 #+caption: GRUBのOS選択画面
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:guix-select
 [[images:guix-select.png]]
 
 すると、Guix Systemをインストールしたディスクの暗号化のパスワードを聞かれるので、入力。
 #+caption: ディスク暗号化のパスワードを入力
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:decrypt.png
 [[images:decrypt.png]]
 
 これで、Guix Systemが立ち上がる。日本語を表示できることを確認。
 #+caption: Guix Systemのログイン画面
 #+attr_latex: scale=0.75
-#+label: fig:label
+#+label: fig:login
 [[images:login.png]]
 
 あとはGNOMEのUIなので、普通にログインできるだろう。
@@ -1055,8 +1056,10 @@ guix-daemonはguixを走らせるために重要なデーモンで、guixはこ�
 今、日本語を表示できることを確認した。
 このままGuix Systemに一切のカスタマイズを加えるつもりがないのならば、この章は飛ばしても構わない。
 しかし、おそらくGuix Systemを使う人は、ほとんど全員カスタマイズしたくなる性分の人だろう。
+特にGuixは自由ソフトウェアを思想としており、プロプライエタリなドライバはデフォルトでは利用できない。
+後述する手順を踏めば利用可能だが、それはここで言うカスタマイズに相当することに留意して欲しい。
 また、ひとつ後の章では =guix= コマンドによるパッケージのインストールも扱うので、
-もしエディタにEmacsを使いたいという場合は、この章を後回しにするとよい。
+もしエディタにEmacsを使いたいという場合は、この章を次の章の後に行うとよい。
 
 実は今日本語が表示できているのが奇跡な状態である。
 詳細はわかっていないが、インストール時特有のプロセスによって日本語が表示できている。
@@ -1075,3 +1078,169 @@ guix-daemonはguixを走らせるために重要なデーモンで、guixはこ�
 
 gdmとはGNOME Display Managerのことであり、内部的なユーザとして扱われている。
 しかしこいつはグローバルにインストールされたフォントの場所を知らないため、これを教えてあげようというわけだ。
+その後、フォントのキャッシュを更新するために以下のコマンドを実行する。
+#+BEGIN_SRC bash -n
+  fc-cache -fv
+#+END_SRC
+
+これで =guix system reconfigure /etc/config.scm= しても日本語が表示できるようになった。
+ちなみに、 =/etc/config.scm= ファイル(厳密には、別に場所はここである必要はないし、名前も自由)に作ってもらうことも
+可能らしい。[[https://git.sr.ht/~taiju/taix/tree/e396904863e26f04c87c2a4ebd76b1b34fbd7ae7/item/guix-config/system-config.scm#L59][Taijuさんの設定ファイル]]にあるように、 =services= に以下を追加すればよい。
+#+BEGIN_SRC scheme -n
+  (extra-special-file "/var/lib/gdm/.config/fontconfig/fonts.conf"
+                      (plain-file "gdm-fonts.conf"
+                                  "<?xml version='1.0'?>
+  <!DOCTYPE fontconfig SYSTEM 'fonts.dtd'>
+  <fontconfig>
+    <dir>/run/current-system/profile/share/fonts/</dir>
+  </fontconfig>
+  "))
+#+END_SRC
+
+** パッケージのインストールのしかた
+まずはじめに、
+#+BEGIN_SRC bash -n
+  guix pull
+#+END_SRC
+を走らせる必要がある。このコマンドはチャンネルから情報を取ってきて、各パッケージをアップデートしてくれる。
+チャンネルとは、ざっくり言えばパッケージの定義の集合である。
+厳密に言えば、Guile(Schemeの処理系のひとつ)のモジュールと呼ばれる単位で公開されているので、もっと柔軟でなんでもできる。
+=guix pull= 自体がアップデートなしても実行に体感何分かかかること、guix自身がそこそこ頻繁にアップデートされること、
+アップデートが入ると体感10分くらいかかることに留意してほしい。要は、 =guix pull= はそこそこ遅い。
+
+インストール基本的には以下のようなものを実行すればよい。これでEmacsをインストールできる。
+#+BEGIN_SRC bash -n
+  guix install emacs
+  #+END_SRC
+また、アンインストールは以下のコマンド。
+#+BEGIN_SRC bash -n
+  guix remove emacs
+#+END_SRC
+ちなみに =guix insall= は =guix package -i= のエイリアスで、
+パッケージに関する操作はすべて =guix package= に集約されている。たとえば、
+#+BEGIN_SRC bash -n
+  guix package --roll-back
+  #+END_SRC
+とすれば、前の世代に戻れる。
+私もあまり詳しくないが、ざっくり言えば、インストールやアンインストールをするたびに世代が進む(たぶん)。
+
+インストールされたパッケージをリストするには
+#+BEGIN_SRC bash -n
+  guix package -I
+#+END_SRC
+で、インストールできるパッケージをリストするには
+#+BEGIN_SRC bash -n
+  guix package -A
+#+END_SRC
+また、正規表現にマッチするパッケージを検索するには
+#+BEGIN_SRC bash -n
+  guix search regexp
+#+END_SRC
+とする。
+
+** 日本語IMEを入れる
+私はSKK使いだが、残念ながら未だGuixのIMEにSKKを使う方法を知らない。
+とりあえず最低限日本語を入力するため、 ibusとibus-anthyをインストールする。
+#+BEGIN_SRC bash -n
+  guix install ibus ibus-anthy
+#+END_SRC
+そして、[[https://issues.guix.gnu.org/35610#7-lineno19][issue]]にあるように、 =~/.bash_profile= に以下を追記する。なければ新規作成。
+#+BEGIN_SRC bash -nN
+  export GUIX_GTK2_IM_MODULE_FILE="$HOME/.guix-profile/lib/gtk-2.0/2.10.0/immodules-gtk2.cache"
+  export GUIX_GTK3_IM_MODULE_FILE="$HOME/.guix-profile/lib/gtk-3.0/3.0.0/immodules-gtk3.cache"
+  export IBUS_COMPONENT_PATH="$HOME/.guix-profile/share/ibus/component"
+  export GTK_IM_MODULE=ibus
+  export XMODIFIERS=@im=ibus
+  export QT_IM_MODULE=ibus
+  #+END_SRC
+もし =~/.cache/ibus= が存在するなら、全て削除し、再起動する。
+
+再起動したあと、画面右上のボタンから設定に移行し、左のメニューからキーボードを選択する。
+すると、以下のようになるはずだ。
+#+caption: IME変更前の状態
+#+attr_latex: scale=0.75
+#+label: fig:ime-before
+[[images:ime-before.png]]
+
+画面に写ったプラスボタンをクリックし、「日本語」を選択すると、
+「日本語(Anthy)」が出ているので、それを選択する。
+#+caption: 言語の選択
+#+attr_latex: scale=0.75
+#+label: fig:ime-select-1
+[[images:ime-select-1.png]]
+#+caption: IMEの選択
+#+attr_latex: scale=0.75
+#+label: fig:ime-select-2
+[[images:ime-select-2.png]]
+
+すると、以下のようになる。
+#+caption: IME変更後の状態
+#+attr_latex: scale=0.75
+#+label: fig:ime-after
+[[images:ime-after.png]]
+
+「Japanese」や「English(US)」は不要なので、右のスリードットを押して得られるメニューで削除を選択。
+#+caption: 不要なIMEの削除
+#+attr_latex: scale=0.75
+#+label: fig:ime-delete
+[[images:ime-delete.png]]
+
+これで無事日本語が入力できるはずだ。
+
+** 不自由なソフトウェア
+不自由なソフトウェア(プロプライエタリなドライバやファームウェア含む)を使いたい場合、
+デフォルトのguixチャンネルは利用できない。
+そのために、非公式のチャンネルとして[[https://gitlab.com/nonguix/nonguix][nonguix]]というものが存在する。
+この章ではこのチャンネルを導入する。不自由なソフトウェアを利用したくない場合は、この章は飛ばしてよい。
+
+READMEにあるように、 =~/.config/guix/channels.scm= に以下を書く。
+このファイルはユーザが利用するguixのチャンネルを定義する。自分でGitレポジトリを作ってチャンネルとすることも可能だ。
+#+BEGIN_SRC scheme -n
+  (cons* (channel
+          (name 'nonguix)
+          (url "https://gitlab.com/nonguix/nonguix")
+          ;; Enable signature verification:
+          (introduction
+           (make-channel-introduction
+            "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+            (openpgp-fingerprint
+             "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+         %default-channels)
+#+END_SRC
+これを書いたら、 =guix pull= しておこう。
+
+次に、Linuxカーネル及び不自由なファームウェア、ドライバを導入する。
+これもREADMEにあるように、 =/etc/config.scm= を以下のように変更する。
+編集には管理者権限が必要であることに注意。
+#+BEGIN_SRC scheme -n
+  ;; (use-modules (gnu)) の行を以下に変更
+  (use-modules (gnu)
+               (nongnu packages linux)
+               (nongnu system linux-initrd))
+
+  (operating-system
+   ;; 以下の行を追記
+   (kernel linux)
+    (initrd microcode-initrd)
+    (firmware (list linux-firmware))
+    ...
+    )
+#+END_SRC
+
+最後に、以下のコマンドを実行。こちらにも管理者権限が必要なので =sudo= がついている。
+=guix system reconfigure= は、Guix Systemそのものの設定を読み直し、適宜ビルドするコマンドである。
+そこそこに時間がかかるため、気長に待とう。
+#+BEGIN_SRC bash -n
+  sudo guix system reconfigure /etc/config.scm
+#+END_SRC
+
+** おわりに
+Guix SystemやGuixの日本語情報はあまりなく、大変かもしれないが、是非使ってみて欲しい。
+日本語の記事を書いてくれるとさらに嬉しい。
+
+** 謝辞など
+Guix Systemを導入し、さらにこの記事を書くにあたり、 [[https://libre.taiju.info/][Taiju]]さんにとてもお世話になりました。
+この場を借りて感謝の意を表したいと思います。本当にありがとうございました。
+
+また、Taijuさんと共に[[https://join.slack.com/t/guix-jp/shared_invite/zt-17aoza5yo-KAVDj5aPPwsJ9X7e4lJteg][Guix-jp]]というGNU Guix及びGNU Guix Systemの日本語コミュニティを立ち上げました。
+すこしでもGuixに興味を持った方は、是非遊びにきてください!!
