@@ -1,0 +1,11 @@
+[[redirects]]
+  from = "http://rocktakey.netlify.app/*"
+  to = "https://blog.rocktakey.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://rocktakey.netlify.app/*"
+  to = "https://blog.rocktakey.com/:splat"
+  status = 301
+  force = true
