@@ -1245,3 +1245,37 @@ Guix Systemを導入し、さらにこの記事を書くにあたり、 [[https:
 
 また、Taijuさんと共に[[https://join.slack.com/t/guix-jp/shared_invite/zt-17aoza5yo-KAVDj5aPPwsJ9X7e4lJteg][Guix-jp]]というGNU Guix及びGNU Guix Systemの日本語コミュニティを立ち上げました。
 すこしでもGuixに興味を持った方は、是非遊びにきてください!!
+* TODO Emacsのパッケージをつくってみよう
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2022-df7edb45-d0ce-7cd4-5c6b-1a3efa8b4b4c
+  :EXPORT_HUGO_TAGS: Emacs Emacs-Lisp
+  :END:
+* TODO 自分専用のELPA(Emacs Lisp Package Archive)をGitHubでホストしよう
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2022-11f6e993-0310-7aa4-0563-ea30d0f25c5d
+  :EXPORT_HUGO_TAGS: Emacs package.el GitHub
+  :END:
+* TODO MELPAにパッケージを提出してみんなに使ってもらおう
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2022-c6b38d7a-1974-ad04-8ebb-ee117a8a1d2d
+  :EXPORT_HUGO_TAGS: EMacs MELPA
+  :END:
+* TODO Guixのパッケージをつくってみよう-その1:簡単なフォントのパッケージを作る
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2022-770eb4b6-5c63-62d4-bbcb-475d92404603
+  :EXPORT_HUGO_TAGS: GNU-Guix Scheme
+  :END:
+* TODO Guixのパッケージをつくってみよう-その2:ビルドが必要なパッケージを作る
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2022-c5b823db-a6b6-23a4-5783-c7741fd0f420
+  :EXPORT_HUGO_TAGS: GNU-Guix Scheme
+  :END:
+* TODO Guixのパッケージをつくってみよう-その3:どうしてもビルドできないときはバイナリを直接使ったパッケージを作る
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2022-6353e393-4e0b-6ad4-754b-0d84ebd31c97
+  :EXPORT_HUGO_TAGS: GNU-Guix Scheme
+  :END:
+* TODO micを使って自分だけのuse-pacakgeを定義し、init.elを管理する
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2022-48b1a128-e423-8444-202b-3c25fd244198
+  :END:
