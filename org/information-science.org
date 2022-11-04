@@ -1,6 +1,6 @@
 #+title: Information Science
 #+author: ROCKTAKEY
-#+date: <2020-08-04 Tue>
+
 #+options: ^:{}
 
 #+hugo_base_dir: ../

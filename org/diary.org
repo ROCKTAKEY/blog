@@ -1,6 +1,6 @@
 #+title: Diary
 #+author: ROCKTAKEY
-#+date: <2020-08-05 Wed>
+
 #+options: ^:{}
 
 #+hugo_base_dir: ../
