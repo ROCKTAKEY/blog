@@ -323,7 +323,7 @@ CLOSED: [2021-11-30 Tue 23:59]
   :EXPORT_FILE_NAME: 2021-eb9f86f0-ee65-1824-4063-ed0d0ba15dbf
   :EXPORT_HUGO_TAGS: Emacs Emacs-Lisp grugru
   :END:
-  この記事は、[[https://qiita.com/advent-calendar/2021/emacs][Emacs Advent Calendar 2021]]の記事です。
+  [[https://qiita.com/advent-calendar/2021/emacs][https://img.shields.io/badge/Emacs%20Advent%20Calendar%202021-22%E6%97%A5%E7%9B%AE-d60a34.svg?style=flat-square&logo=qiita]]
 ** 導入
    さてみなさん、突然ですが、コードを書いていて、「あっやっぱり ~true~ じゃなくて ~false~ だった」
    「 ~&&~ じゃなくて ~||~ だった」などということが多々あるのではないでしょうか。そして、往々にして、
