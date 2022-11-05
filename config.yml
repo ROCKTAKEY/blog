@@ -75,6 +75,13 @@ params:
     - name: "Patreon"
       icon: "fab fa-patreon"
       url: "https://patreon.com/rocktakey"
+    - name: "LiberaPay"
+      icon: "si si-liberapay"
+      url: "https://liberapay.com/ROCKTAKEY"
+    - name: "Ko-fi"
+      icon: "si si-kofi"
+      url: "https://ko-fi.com/rocktakey"
+
 
   assets:
     favicon: "/favicons/favicon.ico"
