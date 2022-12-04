@@ -1335,7 +1335,7 @@ GitHubやGitLabレポジトリの場合は =https://gitlab.com/username/channel=
 #+BEGIN_SRC scheme
   (define-module (your-channel-name packages fonts)
     #:use-module (guix packages)
-    #:use-module (guix licenses)
+    #:use-module ((guix licenses) #:prefix license:)
     #:use-module (guix download)
     #:use-module (guix build-system font))
 
@@ -1623,13 +1623,49 @@ shellのプロンプトに =[env]= が追加されていたら正常に移行で
 私もこれに対する解法は持ち合わせていません。
 パイプや =&&= を =guix shell= に渡す方法があれば教えていただけると幸いです。
 
+** パッケージをチャンネルに配信する
+これでパッケージの動作確認が終わりました。最後に =lint= と =style= をかけておきましょう。
+#+BEGIN_SRC shell -n
+  guix style -L /path/to/your/channel/ font-cica
+  guix lint -L /path/to/your/channel/ font-cica
+#+END_SRC
+lintについては必要以上に厳しい場合があるので、脆弱性など重要そうなものでなければ無視しても構いません。
+特に上流のレポジトリに対して「tagが打たれてない」とか「GitHubでReleaseが作られてない」とか言われますが、大抵の場合どうしようもないです。
+一行の長さなどは従っておきましょう。
+
+Gitレポジトリのホスティングサービスを使っている人は、変更をコミットしてプッシュしてください。
+ローカルの人はそのままでよいです。
+
+そうしたら、また以下のコマンドを打ってください。
+#+BEGIN_SRC shell
+  guix pull
+#+END_SRC
+これによって、新しいパッケージ定義がGNU Guixに読み込まれました。
+パッケージ定義が読み込まれているか確認するために、以下のコマンドを打ってみましょう。
+#+BEGIN_SRC shell
+  guix show font-cica
+#+END_SRC
+これで今登録したパッケージの詳細が表示されれば成功です。もしそのままインストールしたければ
+#+BEGIN_SRC shell
+  guix install font-cica
+#+END_SRC
+とすればよいですし、取り除きたければ
+#+BEGIN_SRC shell
+  guix remove font-cica
+#+END_SRC
+とできます。また、一つ前の状態に戻したい(たとえば入れたパッケージがやっぱりいらなかったので入れなかったことにする、など)場合は、
+#+BEGIN_SRC shell
+  guix package --roll-back
+#+END_SRC
+とすればよいです。
+
 ** 最後に
 この記事では、フォントという比較的簡単な対象に対してパッケージ定義を行いました。
 この「簡単」という言葉に驚くかもしれませんが、そもそもパッケージ定義自体に加えてその周辺知識についても一緒に説明しているため、
 フォントのパッケージ定義自体は簡単でも、記事としてはかなり密度が高くなっています。
 実際に =font-cica= に書いた定義自体も30行程度と短いですし、フォントのパッケージ定義自体よりもその周辺知識に頭を使ったと考えてください。
 難しく感じるのも無理はありません。もしなにか質問などあれば、コメントなりメールなりで受け付けます。
-また、Guixの日本語コミュニティである[[https://guix-jp.gitlab.io/][Guix-jp]]もあります。
+また、Guixの日本語コミュニティである[[https://guix-jp.gitlab.io/][Guix-jp]]もあります(ちなみに今回作ったパッケージと同じものが[[https://gitlab.com/guix-jp/channel][Guix-jp公式チャンネル]]にあります)。
 そちらには私以上のエキスパートの人がいますので、是非そちらもご興味あれば覗いてみてください。
 
 
