@@ -1532,7 +1532,7 @@ Lispに慣れていないと括弧に圧倒されるかもしれませんが、�
 #+END_SRC
 
 =sha256= には、 謎の文字列を =base32= に渡したものが与えられています。
-これはいわゆる「ハッシュ値」というものです。
+これはいわゆる「ハッシュ値」というもので、与えられたディレクトリの内容から一意に定まります。
 URIから得られたファイルがパッケージを定義した人と一致していない場合、偽物を掴まされたことになりますが、
 ハッシュ値を比較することで偽物であることを感知できます。
 これにより、偽物を掴まされたことに気付かずにそのパッケージを使用してウイルスやマルウェアに侵されることを防ぎます。
@@ -1540,8 +1540,8 @@ URIから得られたファイルがパッケージを定義した人と一致�
 
 このハッシュ値は、 =guix download <URL>= と入れることで得ることができます。
 対象がgitレポジトリの場合、そのレポジトリをクローンして =guix hash -rx /path/to/repo= とすることで得ることができます。
-後者の場合、異なるコミットやタグにチェックアウトしている場合は異なるハッシュが返るので注意してください。
-また、裏技として、適当なハッシュを入れてパッケージをビルドすると「ハッシュが間違ってるよ」と言いながら実際のハッシュを教えてくれます。
+後者の場合、異なるコミットやタグにチェックアウトしている場合は異なるハッシュ値が返るので注意してください。
+また、裏技として、適当なハッシュ値を入れてパッケージをビルドすると「ハッシュ値が間違ってるよ」と言いながら実際のハッシュ値を教えてくれます。
 
 最後は =build-system= です。
 #+BEGIN_SRC scheme
@@ -1675,6 +1675,261 @@ Gitレポジトリのホスティングサービスを使っている人は、�
   :EXPORT_HUGO_TAGS: GNU-Guix Scheme
   :END:
 [[https://qiita.com/advent-calendar/2022/guix][https://img.shields.io/badge/GNU%20Guix%20Advent%20Calendar%202022-6%E6%97%A5%E7%9B%AE-d60a34.svg?style=flat-square&logo=qiita]]
+
+** 序文
+[[https://blog.rocktakey.com/information-science/2022-770eb4b6-5c63-62d4-bbcb-475d92404603/][前回の記事]]では、フォントのパッケージ定義を通じて、パッケージ定義の流れを解説しました。
+この記事では一歩進んで、ビルドを伴うパッケージの定義を行っていきます。
+
+実はGNU Guixはその思想上、この「ビルド」というプロセスをきちんと行うことを大切にしています。
+前回の記事で、ハッシュ値を確認することで偽物を掴まされていないことを確認するプロセスがあることを説明したと思いますが、
+その一方で配信元がウイルスやマルウェアなどの悪意のあるコードを仕込んでいる場合は感知することはできません。
+これを防ぐための究極の方法は、ソースコードから直接ビルドすることです。
+公開されているソースコードからビルドすれば、ソースコードを確認することで悪意のあるコードが混入していないかを確認することができます。
+一方公開されているバイナリを直接インストールする方法の場合、悪意のあるコードが混入していることを確認する術はありません。
+元のソースコードが公開されていても、そのバイナリがそのソースコードからビルドされたことを確かめられないので無意味です。
+
+このような理由で、GNU Guixはあらゆるパッケージを自分の手元でビルドすることを信条としています。
+もちろんサイズが大きいパッケージをたくさん使うような場合、全てビルドするのは大変な場合もあります。
+そのため、「このサーバーのビルドしたパッケージは信用できるので、ビルドする代わりにバイナリからインストールする」というのを実現する機能があります。
+この機能はSubstitutesと呼ばれています。デフォルトではGNUのサーバーだけが登録されています。詳しくは[[https://guix.gnu.org/en/manual/devel/en/guix.html#Substitutes][公式マニュアル]]をご覧ください。
+また、この機能はあくまでも「ビルド手順をパッケージ定義として示した上で、その手順と全く同一の手順を踏んでいるであろうバイナリを提供するサーバーを信用する」
+という機能であることに注意してください。ビルド手順の記述を省略するようなことはできません。
+そのへんに落ちているバイナリから直接インストールする機能は[[https://blog.rocktakey.com/information-science/2022-6353e393-4e0b-6ad4-754b-0d84ebd31c97/][次回の記事]]で説明します。
+
+** 前提
+GNU Guix自体はインストールされていて、使えるようになっていることを前提とします。
+また、[[https://blog.rocktakey.com/information-science/2022-770eb4b6-5c63-62d4-bbcb-475d92404603/][前回の記事]]の設定が残っていることが前提となっています。
+ただし、試すだけなら必ずしもGitレポジトリを使う必要はなく、 =-L /path/to/channel= オプションを毎回使ってもよいです。
+大抵のサブコマンドには対応しています。
+
+** パッケージを定義する
+今回は、[[https://geoff.greer.fm/ag/][ag]]というバイナリのパッケージを作成していきます。
+agは高速なgrepとして開発されたCLIツールで、パッケージは[[https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/packages/code.scm#n337][GNU Guixの公式チャンネル]]に含まれています。
+そこから引用されたコードはGPLv3 or laterによってライセンスされていることに留意してください。
+
+前回はパッケージ定義の概要を説明するためにパッケージ定義を先に示しましたが、
+今回はパッケージを作るときの流れを実際に体験してもらうため、先に最終形を示すことはしません。
+
+まずは前回同様、モジュールを定義していきます。
+チャンネルの下の =your-channel-name/packages/ag.scm= に以下を書きましょう。
+#+BEGIN_SRC scheme
+  (define-module (your-channel-name packages ag)
+    #:use-module (guix packages)
+    #:use-module ((guix licenses) #:prefix license:)
+    #:use-module (guix download))
+#+END_SRC
+この3つのモジュールはほぼ必ず =#:use-module= することになるため、これを雛形としてもよいと思います。
+前回と異なるのは一行目の =(your-channel-name packages ag)= のファイル名にあたる最後の =ag= の部分くらいです。
+あと、今回はフォントではないので =(gnu build-system font)= を =#:use-module= しないようにしました。
+
+次にパッケージ定義を書いていきます。今回は本家との名前の衝突を避けるために =my-ag= という名前にしましょう。
+ビルドのしかたは[[https://github.com/ggreer/the_silver_searcher#building-a-release-tarball][agのREADME]]に書いてあります。
+それによると、[[https://geoff.greer.fm/ag/][ここ]]にあるtarballからビルドする場合は以下のようなコマンドでインストールできるらしいです。
+#+BEGIN_SRC scheme
+  ./configure
+  make
+  make install
+#+END_SRC
+このようなビルドの手順はLinuxにおいて非常によく使われる典型的なものです。
+まずはこの典型的なビルドをできるようになって欲しいため、このパッケージを題材にしました。
+
+この情報を元に、パッケージ定義を書いてみます。
+#+BEGIN_SRC scheme
+  (define-public my-ag
+    (package
+     (name "my-ag")
+     (version "2.2.0")
+     (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "https://geoff.greer.fm/ag/releases/the_silver_searcher-"
+                    version ".tar.gz"))
+              (sha256
+               (base32
+                "0w1icjqd8hd45rn1y6nbfznk1a6ip54whwbfbhxp7ws2hn3ilqnr"))))
+     (build-system gnu-build-system)
+     (home-page "https://geoff.greer.fm/ag/")
+     (synopsis "Fast code searching tool")
+     (description
+      "The Silver Searcher (@command{ag}) is a tool for quickly searching large
+    numbers of files.  It's intended primarily for source code repositories, and
+    respects files like @file{.gitignore} and @file{.hgignore}.  It's also an order
+    of magnitude faster than its inspiration, @command{ack}, and less specialised
+    tools such as @command{grep}.")
+     (license license:asl2.0)))
+#+END_SRC
+上記のフィールドのほとんどは[[https://blog.rocktakey.com/information-science/2022-770eb4b6-5c63-62d4-bbcb-475d92404603/][前回の記事]]と全く同様のため、詳細は省きますが、 =my-ag= という名前のパッケージを定義しています。
+ソースコードは "https://geoff.greer.fm/ag/releases/the_silver_searcher-2,2,0.tar.gz" にあります。
+基本的に上記に示したフィールドは全て必須であるため、これをテンプレートとして穴埋めすることでパッケージを作るのが手っ取り早いです。
+
+さて、今書いた中で最も大事なフィールドは =(build-system gnu-build-system)= です。
+この変数の定義は =(guix build-system gnu)= というモジュールにあるので、このモジュールを =#:use-module= しておいてください。
+
+先程のフィールドでは、 =build-system= を =gnu-build-system= と指定しています。
+この =gnu-build-system= は、実は正に =./configure && make && make install= の典型的なビルド手順を表しています
+(詳細な仕様が知りたい方は[[https://guix.gnu.org/en/manual/devel/en/guix.html#Build-Systems][公式マニュアル(英語)]]を参照)。
+
+ただし、 =./configure && make && make install= をそのまま走らせているわけではないということに注意してください。
+GNU Guixはその特性上 =/bin/= や =/lib/= の代わりに =/gnu/store/xxxxxxxxxxxxxxxxx-my-ag-2.2.0/bin/= や
+=/gnu/store/xxxxxxxxxxxxxxxxx-my-ag-2.2.0/lib/= に生成物をインストールする必要があります。
+そのため、 =./configure= にインストール先の接頭辞を指定する =--prefix= を付ける、などを行っています。
+具体的な実装を見たい場合は、
+GNU Guix公式レポジトリの[[https://git.savannah.gnu.org/cgit/guix.git/tree/guix/build/gnu-build-system.scm][guix/build/gnu-build-system.scm]]か[[https://git.savannah.gnu.org/cgit/guix.git/tree/guix/build-system/gnu.scm][guix/build-system/gnu.scm]]をご覧ください。
+=#:use-module= したのは前者ですが、ビルド手順自体は主に後者に実装されています。
+
+ビルドは具体的にどのような手順で行われるのでしょうか。これも[[https://guix.gnu.org/en/manual/devel/en/guix.html#Build-Phases][公式マニュアル(英語)]]に記載されています。
+=gnu-build-system= では以下のような手順で行われます。これらの各手順はフェイズ(phase)と呼ばれています。
+なお、他のビルドシステムも大抵は =gnu-build-system= を継承して作られているため、似たような流れになります。
+また、ソースのダウンロード自体はビルドシステムが走るよりも前に行われており、
+ビルドシステムが走る環境は外のネットワークには一切繋がりません。
+これはソースのハッシュ値が等しいことと成果物が等しいことを等価にするのに必要です
+(ネットワークに繋がってしまうと、ソースコードが同じでもネットワーク経由の入力によって成果物が変わり得る)。
+- =set-paths= :: ソースのダウンロードやビルドのための環境を用意するフェイズです。
+  各種依存へパスを通したりします。
+- =unpack= :: =source= に指定したソースコードのtarballやzipを展開し、ビルド用の環境へとコピーします。
+- =patch-source-shebangs= :: シェルスクリプトのshebangを変更します。
+  GNU GuixはFHSに従ったディレクトリ構造をしておらず、 =bash= や =sh= をも =/gnu/store/= 以下に閉じ込めているため、
+  その位置をシェルスクリプトに伝えるべく =#!/bin/sh= や =#!/bin/bash= を
+  =#!/gnu/store/xxxxxxxxxxxxx-bash-0.0/bin/sh= や =#!/gnu/store/xxxxxxxxxxxxx-bash-0.0/bin/bash= に置き換えます。
+- =configure= :: =./configure= を実行します。先程述べたように、 =--prefix= 引数によってインストール先が変更されます。
+  また、後述の =#:confiugre-flags= 引数によって追加のオプションを指定できます。
+- =build= :: =make= を実行します。他のビルドシステムの場合でも、このフェイズで実際のビルドが走ることが多いです。
+  なお、前述のとおり、ここではネットワークには一切繋がりません。
+  そのため、外からダウンロードしてくる操作がビルドスクリプトに含まれていると失敗します。
+  その場合、外からダウンロードしてくる操作自体をビルドスクリプトから取り除くか実行されないようにして、
+  ダウンロードされてくる部分を別のパッケージとして定義し、それを依存としたパッケージを定義する必要があります。
+  この作業はかなり大変です。後述の =#:phases= 引数を使ってこのフェイズ自体を一から書き直したり、
+  [[https://guix.gnu.org/en/manual/devel/en/guix.html#index-substitute_002a][=substitute=]]マクロ(前述のバイナリ提供サーバーとしてのsubstituteとは無関係。 =#:phases= の詳細説明を参照)
+  を使ってビルドスクリプトを修正するフェイズをビルド前に追加したりすることで対応することになります。
+  ここはどうしてもアドホックになりがちなところです。
+- =check= :: =make check= を実行します。後述の =#:tests?= 引数によって抑制できます。
+- =install= :: =make install= を実行します。 =./configure= に渡された =--prefix= オプションにより、
+  =/gnu/store/= 直下にある専用のインストール先にインストールされます。
+- =patch-shebangs= :: =patch-source-shebangs= とほとんど同じです。
+  今回はソースコードではなくインストールされた実行ファイルに適用されます。
+- =strip= :: 生成されたバイナリからデバッグ情報を取り除きます。
+  なにをしているのかをあまり気にすることはないのですが、このフェイズでたまにコケるので、
+  その場合は後述の =#:strip-binaries?= 引数を =#f= とするとよいです。
+- =validate-runpath= :: 生成されたバイナリの =RUNPATH= を確認し、依存するライブラリがきちんと存在するかどうかを検証します。
+  このフェイズも引数を用いて飛ばすことは可能ですが、ここでコケるのはライブラリの依存が足りていない証拠なので、
+  「足りない」と言われた依存を適宜追加してください。
+
+さて、前述のように、 =gnu-build-system= は途中でテストを走らせるために =make check= を実行するので、
+テストのない場合や他のコマンドによってテストが走る場合にはこのままでは使えません。
+じゃあそのような場合どうするのかという話になりますが、実はこの「ビルドシステム」というのは引数を取ることができます。
+引数は =package= のフィールドとして直接与えます。つまり以下のように書きます。
+#+BEGIN_SRC scheme
+  (define-public example
+    (package
+     (name "example")
+     (version "0")
+     ...
+     (arguments
+      '(#:tests? #f
+        #:configure-flags '("--some-option" "--other-option")))
+     (build-system gnu-build-system)
+     ...))
+#+END_SRC
+使用するビルドシステムによって取れる引数は異なりますが、
+ほとんどのビルドシステムは =gnu-build-system= を継承して作られているため、代表的なものは他のビルドシステムでも
+利用できます。折角なのでいくつか紹介しておきます。[[https://guix.gnu.org/en/manual/devel/en/guix.html#Build-Systems][公式マニュアル(英語)]]で一覧を見ることができます。
+- =#:configure-flags= :: =./configure= に渡されるオプションを文字列のリストで渡します。
+  典型的にはオプションの機能をオンにしたりオフにしたりするのに使います。
+- =#:make-flags= :: =make= 、 =make check= 、 =make install= に渡されるオプションを文字列のリストで渡します。
+  あまり利用頻度は多くないです。
+- =#:tests?= :: テスト(=make check=)をするかどうか、すなわち =check= フェイズを行うかどうか真偽値で渡します。
+  デフォルトでは =#t= (Schemeにおけるtrue)となっていて、
+  ネットワークがないとテストが通らない場合やそもそもテストがない場合には
+  =#f= (Schemeにおけるfalse)を指定してテストをしないようにします。
+- =#:strip-binaries?= :: 生成されたバイナリからデバッグ情報を取り除くかどうか、
+  すなわち =strip= フェイズを行うかどうかを真偽値で渡します。
+- =#:phases= :: この引数が最も柔軟にビルド内容を変更できます。
+  具体的には、ビルドプロセスの1手順(phase)をまるっと別のものに入れ替えたり、ある手順の前や後ろに別の手順を追加したりできます。
+  詳細の書き方を以下に置いておきますが、かなり難しい内容になっているため、一旦飛ばしても構いません。
+
+#+begin_details
+#+begin_summary
+=#:phases= 引数を利用するための詳細な説明
+#+end_summary
+各フェイズ自体もSchemeで書かれているため、無名関数を与えるだけで新しいフェイズを与えることができます。
+この引数として与える式は、ほとんどが =(modify-phases %standard-phases ...)= という形です。
+=%standard-phases= というのは =build-system= を経由して与えられるフェイズ群で、
+これを修正した新しいフェイズ群を与えることでフェイズの変更を達成しています。
+
+=(modify-phases %standard-phases ...)= のうち =...= の部分には以下の4つをいくつでも書くことができます。
+- =(delete 'phase-name)= :: =phase-name= という名前のフェイズを削除します。
+- =(replace 'old-phase-name 無名関数)= :: =old-phase-name= という名前のフェイズを新しいフェイズに置き換えます。
+- =(add-before 'base-phase-name 'new-phase-name 無名関数)= ::
+  =base-phase-name= という名前のフェイズの前に =new-phase-name= という名前の新しいフェイズを追加します。
+- =(add-after 'base-phase-name 'new-phase-name 無名関数)= ::
+  =base-phase-name= という名前のフェイズの後に =new-phase-name= という名前の新しいフェイズを追加します。
+無名関数は新しいフェイズの定義になります。
+無名関数はキーワード引数を受け取ります。
+受け取れる引数は =#:make-flags= などの各種引数と、 =inputs= や =outputs= といった連想リストです。
+=inputs= は、キーを依存の名前、値を依存として与えられたディレクトリ(読取専用)へのパスとした連想リストです。
+=outputs= は、キーを出力の名前(普通に定義したパッケージは"out"のみをキーとする)、
+値を出力先(インストール先)のディレクトリへのパスとした連想リストです。
+これらを用いることで、新しいフェイズから依存のディレクトリやインストール先のディレクトリを直接触ることができます。
+たとえばデフォルトの出力先である"out"に対応するディレクトリを取り出す場合は、 =(assoc-ref outputs "out")= とします。
+
+以下に例を示します。この例は[[https://guix.gnu.org/en/manual/devel/en/guix.html#Build-Phases][公式マニュアル(英語)]]からの引用です。
+#+BEGIN_SRC scheme
+  (define-public example
+    (package
+      (name "example")
+      ;; other fields omitted
+      (build-system gnu-build-system)
+      (arguments
+       '(#:phases (modify-phases %standard-phases
+                    (delete 'configure)
+                    (add-before 'build 'set-prefix-in-makefile
+                      (lambda* (#:key outputs #:allow-other-keys)
+                        ;; Modify the makefile so that its
+                        ;; 'PREFIX' variable points to "out".
+                        (let ((out (assoc-ref outputs "out")))
+                          (substitute* "Makefile"
+                            (("PREFIX =.*")
+                             (string-append "PREFIX = "
+                                            out "\n")))))))))))
+#+END_SRC
+この例では2つのフェイズ修正を行っています。
+一つ目は =(delete 'configure)= による =configure= フェイズの削除です。
+二つ目は =(add-before 'build 'set-prefix-in-makefile ...)= による新しいフェイズの追加です。
+
+Schemeでキーワード引数を受け取る無名関数を作りたい場合、
+=(lambda* (#:key key1 key2 #:allow-other-keys) ...)= のように書きます。
+特に =#:allow-other-keys= は必要のないキーワード引数を受け取ってもエラーにならないようにするもので、
+フェイズのようにどんな引数が渡されるかわからないような状況では便利です。
+
+今回受け取って引数として束縛するキーワード引数は =outputs= だけです。
+前述のようにここには連想リストが束縛されています。
+その後、 =let= 節を用いて =(assoc-ref outputs "out")= すなわちインストール先のディレクトリへのパスを
+=out= 一時変数に束縛しています。
+さらにその後 =substitute*= マクロを使っています。
+このマクロは、第一引数に与えられたファイルにおいて、第二引数以降で指定された置換を実行します。
+第二引数以降は =((regexp...) body...)= の形を取っていて、 =(regexp...)= には置換したい対象を表す正規表現のリストを、
+=body= は順次評価したときに最後の評価結果が置換後の文字列になるようなS式群を表しています。
+これにより =Makefile= の中にある 「PREFIX=.*」にマッチする文字列すべてが、
+「PREFIX=パッケージにおけるインストール先のディレクトリの絶対パス」へと置き換わります。
+
+=arguments= として与えられたリストはクオートされていることに注意してください。
+すなわち、 *今の無名関数を含めた =arguments= 下にあるS式は、現環境では評価されません。*
+これがなにを意味するかというと、現在のモジュールで =#:use-module= 宣言をいくらしたところで、
+さきほどの無名関数からそのモジュールの機能には一切アクセスできません。
+なぜなら各 =arguments= が評価される環境は現在のモジュールを定義した環境ではなく、
+=guix= がパッケージをビルドしようとしたときの環境だからです。
+もしなんらかのモジュールを無名関数で利用したい場合、
+無名関数の中で =use-modules= マクロを呼び出すことであらためてモジュールの使用を宣言してください。
+以下は =(ice-9 match)= モジュールと =(srfi srfi-26)= モジュールを無名関数の中で使う場合の例です。
+#+BEGIN_SRC scheme
+  (lambda* (#:key outputs #:allow-other-keys)
+   (use-modules (ice-9 match)
+                (srfi srfi-26))
+   ...)
+#+END_SRC
+#+end_details
+
+さて、
 * TODO Guixのパッケージをつくってみよう-その3: どうしてもビルドできないときはバイナリを直接使ったパッケージを作る
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-6353e393-4e0b-6ad4-754b-0d84ebd31c97
