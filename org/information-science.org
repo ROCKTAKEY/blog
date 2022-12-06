@@ -2208,7 +2208,7 @@ guix import go gopkg.in/yaml.v2 --recursive
 これをマスターすればあなたも =guix= の玄人です。
 
 前回とおなじ締めですが、もしなにか質問などあれば、コメントなりメールなりで受け付けます。
-また、Guixの日本語コミュニティである[[https://guix-jp.gitlab.io/][Guix-jp]]もあります(ちなみに今回作ったパッケージと同じものが[[https://gitlab.com/guix-jp/channel][Guix-jp公式チャンネル]]にあります)。
+また、Guixの日本語コミュニティである[[https://guix-jp.gitlab.io/][Guix-jp]]もあります。
 そちらには私以上のエキスパートの人がいますので、是非そちらもご興味あれば覗いてみてください。
 
 * TODO Guixのパッケージをつくってみよう-その3: どうしてもビルドできないときはバイナリを直接使ったパッケージを作る
