@@ -1668,6 +1668,9 @@ Gitレポジトリのホスティングサービスを使っている人は、�
 また、Guixの日本語コミュニティである[[https://guix-jp.gitlab.io/][Guix-jp]]もあります(ちなみに今回作ったパッケージと同じものが[[https://gitlab.com/guix-jp/channel][Guix-jp公式チャンネル]]にあります)。
 そちらには私以上のエキスパートの人がいますので、是非そちらもご興味あれば覗いてみてください。
 
+*** 次回の記事
+次回の記事は「[[https://blog.rocktakey.com/information-science/2022-c5b823db-a6b6-23a4-5783-c7741fd0f420/][Guixのパッケージをつくってみよう-その2: ビルドが必要なパッケージを作る]]」です。
+
 * DONE Guixのパッケージをつくってみよう-その2: ビルドが必要なパッケージを作る
 CLOSED: [2022-12-07 Wed 03:45]
   :PROPERTIES:
