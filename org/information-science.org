@@ -2214,7 +2214,7 @@ guix import go gopkg.in/yaml.v2 --recursive
 * TODO Guixのパッケージをつくってみよう-その3: どうしてもビルドできないときはバイナリを直接使ったパッケージを作る
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-6353e393-4e0b-6ad4-754b-0d84ebd31c97
-  :EXPORT_HUGO_TAGS: GNU-Guix Scheme
+  :EXPORT_HUGO_TAGS: GNU-Guix Scheme nonguix
   :END:
 [[https://qiita.com/advent-calendar/2022/guix][https://img.shields.io/badge/GNU%20Guix%20Advent%20Calendar%202022-7%E6%97%A5%E7%9B%AE-d60a34.svg?style=flat-square&logo=qiita]]
 
