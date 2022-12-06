@@ -1668,8 +1668,8 @@ Gitレポジトリのホスティングサービスを使っている人は、�
 また、Guixの日本語コミュニティである[[https://guix-jp.gitlab.io/][Guix-jp]]もあります(ちなみに今回作ったパッケージと同じものが[[https://gitlab.com/guix-jp/channel][Guix-jp公式チャンネル]]にあります)。
 そちらには私以上のエキスパートの人がいますので、是非そちらもご興味あれば覗いてみてください。
 
-
-* TODO Guixのパッケージをつくってみよう-その2: ビルドが必要なパッケージを作る
+* DONE Guixのパッケージをつくってみよう-その2: ビルドが必要なパッケージを作る
+CLOSED: [2022-12-07 Wed 03:45]
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-c5b823db-a6b6-23a4-5783-c7741fd0f420
   :EXPORT_HUGO_TAGS: GNU-Guix Scheme
@@ -1681,7 +1681,7 @@ Gitレポジトリのホスティングサービスを使っている人は、�
 この記事では一歩進んで、ビルドを伴うパッケージの定義を行っていきます。
 
 実はGNU Guixはその思想上、この「ビルド」というプロセスをきちんと行うことを大切にしています。
-前回の記事で、ハッシュ値を確認することで偽物を掴まされていないことを確認するプロセスがあることを説明したと思いますが、
+[[https://blog.rocktakey.com/information-science/2022-770eb4b6-5c63-62d4-bbcb-475d92404603/][前回の記事]]で、ハッシュ値を確認することで偽物を掴まされていないことを確認するプロセスがあることを説明したと思いますが、
 その一方で配信元がウイルスやマルウェアなどの悪意のあるコードを仕込んでいる場合は感知することはできません。
 これを防ぐための究極の方法は、ソースコードから直接ビルドすることです。
 公開されているソースコードからビルドすれば、ソースコードを確認することで悪意のあるコードが混入していないかを確認することができます。
@@ -1725,6 +1725,7 @@ agは高速なgrepとして開発されたCLIツールで、パッケージは[[
 次にパッケージ定義を書いていきます。今回は本家との名前の衝突を避けるために =my-ag= という名前にしましょう。
 ビルドのしかたは[[https://github.com/ggreer/the_silver_searcher#building-a-release-tarball][agのREADME]]に書いてあります。
 それによると、[[https://geoff.greer.fm/ag/][ここ]]にあるtarballからビルドする場合は以下のようなコマンドでインストールできるらしいです。
+ソースコードは "https://geoff.greer.fm/ag/releases/the_silver_searcher-2,2,0.tar.gz" にあるようです(リンク先のリンクにあります)。
 #+BEGIN_SRC scheme
   ./configure
   make
@@ -1759,11 +1760,17 @@ agは高速なgrepとして開発されたCLIツールで、パッケージは[[
      (license license:asl2.0)))
 #+END_SRC
 上記のフィールドのほとんどは[[https://blog.rocktakey.com/information-science/2022-770eb4b6-5c63-62d4-bbcb-475d92404603/][前回の記事]]と全く同様のため、詳細は省きますが、 =my-ag= という名前のパッケージを定義しています。
-ソースコードは "https://geoff.greer.fm/ag/releases/the_silver_searcher-2,2,0.tar.gz" にあります。
 基本的に上記に示したフィールドは全て必須であるため、これをテンプレートとして穴埋めすることでパッケージを作るのが手っ取り早いです。
 
 さて、今書いた中で最も大事なフィールドは =(build-system gnu-build-system)= です。
 この変数の定義は =(guix build-system gnu)= というモジュールにあるので、このモジュールを =#:use-module= しておいてください。
+#+BEGIN_SRC scheme
+  (define-module (your-channel-name packages ag)
+    #:use-module (guix packages)
+    #:use-module ((guix licenses) #:prefix license:)
+    #:use-module (guix download)
+    #:use-module (guix build-system gnu))
+#+END_SRC
 
 先程のフィールドでは、 =build-system= を =gnu-build-system= と指定しています。
 この =gnu-build-system= は、実は正に =./configure && make && make install= の典型的なビルド手順を表しています
@@ -1814,9 +1821,188 @@ GNU Guix公式レポジトリの[[https://git.savannah.gnu.org/cgit/guix.git/tre
   このフェイズも引数を用いて飛ばすことは可能ですが、ここでコケるのはライブラリの依存が足りていない証拠なので、
   「足りない」と言われた依存を適宜追加してください。
 
-さて、前述のように、 =gnu-build-system= は途中でテストを走らせるために =make check= を実行するので、
-テストのない場合や他のコマンドによってテストが走る場合にはこのままでは使えません。
-じゃあそのような場合どうするのかという話になりますが、実はこの「ビルドシステム」というのは引数を取ることができます。
+さて、ビルドシステムの説明も終わったことなので、先程書いたパッケージを一旦ビルドしてみましょう。
+#+BEGIN_SRC scheme
+  guix build -L /path/to/your/channel my-ag
+#+END_SRC
+すると、たくさんのビルドログの下のほうに、エラーが出るはずです。
+実は、一番下を見てもあまり有用な情報は出てきません。なぜなら末尾のエラーはScheme及びGNU Guixがコケたことによるエラーだからです。
+少し上に、コケた根本の原因、すなわちどこかのフェイズで実行された実際のコマンドのエラーのログがあるはずです。
+今回は、以下のような =configure= フェイズのエラーが出ているはずです。
+#+BEGIN_SRC
+  configure: error: The pkg-config script could not be found or is too old.  Make sure it
+#+END_SRC
+これが出るのは正常です。 =ag= のビルドに必要な依存を一切入れていないからです。
+[[https://github.com/ggreer/the_silver_searcher#building-a-release-tarball][agのREADMEのBuilding a Release tarball]]と[[https://github.com/ggreer/the_silver_searcher#building-master][Building master]]を読むと、以下が必要そうだとわかります。
+- =automake=
+- =pkg-config=
+- =PCRE=
+- =LZMA=
+このうち  =automake= は =gnu-build-system= においては自動で利用可能になっているので、気にする必要はありません。
+とりあえず、 =pkg-config= を依存として追加してみましょう。
+
+依存は =package= オブジェクトに =inputs= フィールドや =native-inputs= として渡します(それらの違いは後述)。
+渡す値は =package= オブジェクトのリストになります。
+つまり、依存パッケージを格納している変数がどのモジュールで定義されているか知る必要があります。
+パッケージの検索には =guix search= や =guix package -A= を使います。
+=guix search= では説明文も含めて検索しますが、 =guix package -A= の場合はパッケージ名だけが検索の対象になります。
+また、ブラウザでは[[https://packages.guix.gnu.org/][こちら]]で検索することも可能です。
+#+BEGIN_SRC shell
+  guix search pkg-config
+#+END_SRC
+結構たくさん候補が出てくるのですが、一番上に =pkg-config= というそのままのパッケージがあります。
+ある特定のパッケージの情報だけを見たい場合は、 =guix show= を使います。
+#+BEGIN_SRC shell
+  guix show pkg-config
+#+END_SRC
+すると以下のような表示が得られます。
+ブラウザの検索の場合は[[https://packages.guix.gnu.org/packages/pkg-config/0.29.2/][こちら]]をご覧ください。
+#+begin_example
+name: pkg-config
+version: 0.29.2
+outputs:
++ out: everything
+systems: x86_64-linux i686-linux
+dependencies:
+location: gnu/packages/pkg-config.scm:37:2
+homepage: https://www.freedesktop.org/wiki/Software/pkg-config
+license: GPL 2+
+synopsis: Helper tool used when compiling applications and libraries
+description: pkg-config is a helper tool used when compiling applications and libraries.  It helps you insert the correct compiler options on the command
++ line so an application can use gcc -o test test.c `pkg-config --libs --cflags glib-2.0` for instance, rather than hard-coding values on where to find glib
++ (or other libraries).  It is language-agnostic, so it can be used for defining the location of documentation tools, for instance.
+#+end_example
+=location= が =gnu/packages/pkg-config.scm= となっていることから、このパッケージは =(gnu packages pkg-config)= モジュールに定義されていることがわかります。
+行数は現時点でのものなので今後変更されているかもしれません。念のため定義を見ておきましょう。locationはブラウザでもコマンドラインでもリンクになっています。
+公式レポジトリでいうと[[https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/packages/pkg-config.scm#n37][こちら]]になります。そこには以下のような定義が書いてあります。
+#+BEGIN_SRC scheme
+  ;; This is the "primitive" pkg-config package.  People should use `pkg-config'
+  ;; (see below) rather than `%pkg-config', but we export `%pkg-config' so that
+  ;; `fold-packages' finds it.
+  (define-public %pkg-config
+    (package
+     (name "pkg-config")
+     (version "0.29.2")
+     ...))
+#+END_SRC
+どうやら変数自体は =%pkg-config= だけど、普通に =pkg-config= を使ってくれと書いてあります。
+今回の場合は該当しませんが、変数名とパッケージ名は異なる場合がたまにあるので、このように確認する作業が必要になります。
+
+さて、どのモジュールのどの変数に =pkg-config= のパッケージが保存されているかわかったので、それを依存に入れていきます。
+#+BEGIN_SRC scheme
+  (define-public my-ag
+    (package
+      (name "my-ag")
+      ...
+      (native-inputs
+       (list pkg-config))
+      ...))
+#+END_SRC
+=native-inputs= は「ビルドを行うプラットフォームで必要なパッケージ」を指定します。
+実はGNU Guixは今いるプラットフォームとは別のプラットフォーム用のパッケージをビルドする機能があります。
+「ビルドには必要だけど実際使うときにはいらないパッケージ」と捉えていただいて構いません。
+一方 =inputs= は実行時にも必要な依存を記述します。なお、 =propagated-inputs= というものも存在します。
+=propagated-inputs= に指定された依存は親パッケージをインストールすると一緒にインストールされます。
+
+さて、これで再びビルドしてみましょう。
+#+BEGIN_SRC shell
+  guix build -L /path/to/your/channel my-ag
+#+END_SRC
+すると、以下のようなエラーが得られます。
+#+begin_example
+ice-9/eval.scm:223:20: In procedure proc:
+error: pkg-config: unbound variable
+hint: Did you forget `(use-modules (gnu packages pkg-config))'?
+#+end_example
+そういえば、 =pkg-config= が定義されているモジュール =(gnu packages pkg-config)= を指定していませんでしたね。
+このようにモジュールを指定せずに変数を使ってしまっても、かなりの確率で教えてくれます。
+勘で依存パッケージの変数を書いてビルドして、ヒントでどこにあるか確認するという横着もできてしまいます(私もけっこうやる)。
+#+BEGIN_SRC scheme
+scheme
+  (define-module (your-channel-name packages ag)
+    #:use-module (guix packages)
+    #:use-module ((guix licenses) #:prefix license:)
+    #:use-module (guix download)
+    #:use-module (guix build-system gnu)
+    #:use-module (gnu packages pkg-config))
+#+END_SRC
+
+これでもう一度ビルドしましょう。
+#+BEGIN_SRC shell
+  guix build -L /path/to/your/channel my-ag
+#+END_SRC
+今度は最初とは別のエラーが =configure= フェイズで出ています。
+#+begin_example
+configure: error: Package requirements (libpcre) were not met:
+
+No package 'libpcre' found
+#+end_example
+先程言ったように、  =PCRE= が依存として必要でした。他にも =LZMA= が必要とのことだったので、一気に解決を試みましょう。
+
+先程と同様に =guix search= やブラウザでの検索を行うと、 =pcre= は =(gnu packages pcre)= モジュールにある =pcre= という変数に束縛されたパッケージに
+あるとわかります。ここでは詳細を省きます。 =pkg-config= のときと全く同じなので、是非実際に試してみてください。
+
+
+=LZMA= についても同様に検索しますが、どうも =lzma= という名前のパッケージはないようです。
+これでは埒があかないので、とりあえずビルドして =./configure= がどんなエラーを吐くか見てみましょう。
+=(gnu packages pcre)= モジュールを =use-module= しつつ、以下のようにパッケージ定義を変更しましょう。
+#+BEGIN_SRC scheme
+  (define-public my-ag
+    (package
+      (name "my-ag")
+      ...
+      (native-inputs
+       (list pkg-config))
+      (inputs
+       (list pcre))
+      ...))
+#+END_SRC
+依存として =inputs= に =PCRE= を追加しました。ビルドしてみましょう。
+#+BEGIN_SRC shell
+  guix build -L /path/to/your/channel my-ag
+#+END_SRC
+すると以下のようなエラーが =build= フェイズで得られます。 =configure= フェイズはどうやら正常に通ったようです。
+#+begin_example
+  src/zfile.c:63:9: error: unknown type name ‘z_stream’
+     63 |         z_stream gz;
+        |         ^~~~~~~~
+  (後略)
+#+end_example
+ここからはGNU Guixに限った話ではなく、ただただビルドを通るまで依存を追加していく作業になります。
+幸い =z_stream= でググると =zlib= の話が大量に出てくるので、 =zlib= に定義されていることがすぐわかります。
+また、もう一度基本に戻って[[https://github.com/ggreer/the_silver_searcher#building-master][公式のビルド手順]]を見てみると、Fedoraにおける依存解決のしかたが書いてあります。
+#+BEGIN_SRC shell
+  yum -y install pkgconfig automake gcc zlib-devel pcre-devel xz-devel
+#+END_SRC
+どうも、ここでも =zlib= が必要なことがわかります。(もうひとつ =xz= というのも入っていますが、とりあえず無視しておきます。)
+GNU Guixでのビルド方法の情報は少ないため、このような他のディストロの情報を利用するのも大切です。
+
+先程と同じように =zlib= というパッケージを探し出していきます。
+ここも詳細は省きますが、 =(gnu packages compression)= モジュールに =zlib= が定義されています。
+=#:use-module= しつつまた依存を追加していきます。
+#+BEGIN_SRC scheme
+  (define-public my-ag
+    (package
+      (name "my-ag")
+      ...
+      (native-inputs
+       (list pkg-config))
+      (inputs
+       (list pcre zlib))
+      ...))
+#+END_SRC
+ここでビルドすると、 =build= フェイズの最後に行うリンクでコケます。
+#+begin_example
+    CCLD     ag
+  ld: src/log.o:/tmp/guix-build-my-ag-2.2.0.drv-0/the_silver_searcher-2.2.0/src/log.h:12: multiple definition of `print_mtx'; src/ignore.o:/tmp/guix-build-my-ag-2.2.0.drv-0/the_silver_searcher-2.2.0/src/log.h:12: first defined here
+  ld: src/log.o:/tmp/guix-build-my-ag-2.2.0.drv-0/the_silver_searcher-2.2.0/src/util.h:15: multiple definition of `out_fd'; src/ignore.o:/tmp/guix-build-my-ag-2.2.0.drv-0/the_silver_searcher-2.2.0/src/util.h:15: first defined here
+  (後略)
+#+end_example
+=ag multiple definition of= で検索してみると、どうやら [[https://github.com/ggreer/the_silver_searcher/issues/1378][=ag= 自体のバグ]]なようです。そこの説明文をみるに、
+GCC-10(=gnu-build-system= で利用されるデフォルトのGCCのバージョンは2022/12/7現在では10です)では
+=./configure= に ~CFLAG=-fcommon~ を付けないと動かないとのこと。このような場合、どうすればよいでしょうか。
+
+実は「ビルドシステム」というのは引数を取ることができます。
 引数は =package= のフィールドとして直接与えます。つまり以下のように書きます。
 #+BEGIN_SRC scheme
   (define-public example
@@ -1929,7 +2115,99 @@ Schemeでキーワード引数を受け取る無名関数を作りたい場合�
 #+END_SRC
 #+end_details
 
-さて、
+つまり、今回の場合は =#:configure-flags= として ~CFLAG=-fcommon~ が与えられればよいわけです。
+つまり以下のように書きます。
+#+BEGIN_SRC scheme
+  (define-public my-ag
+    (package
+      (name "my-ag")
+      ...
+      (arguments
+       '(#:configure-flags (list "CFLAGS=-fcommon")))
+      ...))
+#+END_SRC
+この状態で再びビルドしてみましょう。
+
+すると、エラーが全く出ずに最後まで実行できました。ビルド成功です。しかしまだ喜んではいけません。
+それがインストールされた環境へ入って実行してみましょう。今回は =--pure= でも =--container= でも構いません。
+#+BEGIN_SRC shell
+  guix shell --pure -L /path/to/your/channel my-ag
+#+END_SRC
+たとえば今作っていたチャンネルのディレクトリに入り、 =ag home-page= と実行してみましょう。
+すると、我々が今作成したパッケージや、前回の記事で作ったフォントのパッケージの =home-page= フィールドがきちんとみつけられました。
+きちんと動いています。
+
+#+begin_details
+#+begin_summary
+=xz= について
+#+end_summary
+
+先程見た[[https://github.com/ggreer/the_silver_searcher#building-master][公式のビルド手順]]には、Fedoraにおける依存解決のしかたが書いてありました。
+#+BEGIN_SRC shell
+  yum -y install pkgconfig automake gcc zlib-devel pcre-devel xz-devel
+#+END_SRC
+ここには、 =xz= というみたことのない依存を入れています。
+なくても動きますが、[[https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/packages/code.scm#n338][公式のチャンネル]]の定義では入れています。
+せっかくなので =xz= を入れていきましょう。
+
+まずは、 =xz= を検索してみます。今度は =guix package -A= を使ってみましょう。
+#+BEGIN_SRC shell
+  guix pacakge xz
+#+END_SRC
+すると以下のようなリストが得られます。
+#+begin_example
+  java-xz             	1.9  	out       	gnu/packages/java-compression.scm:288:2
+  pixz                	1.0.7	out       	gnu/packages/compression.scm:1059:2
+  rust-xz2            	0.1.6	out       	gnu/packages/crates-io.scm:67762:2
+  xz                  	5.2.5	out,static	gnu/packages/compression.scm:509:2
+  xzgv                	0.9.2	out       	gnu/packages/image-viewers.scm:983:2
+#+end_example
+ずばり =xz= という名前のパッケージがあるので、これを使うとよさそうです。
+=guix show xz= で詳細情報も確認しておくと確実です(LZMAに触れられています)。
+モジュールは =zlib= と同様なので新しく =use-module= する必要はなさそうです。
+変数名もそのまま =xz= であることを確認し、依存として =inputs= に =xz= も追加します。
+#+BEGIN_SRC scheme
+  (define-public my-ag
+    (package
+      (name "my-ag")
+      ...
+      (native-inputs
+       (list pkg-config))
+      (inputs
+       (list pcre zlib xz))
+      ...))
+#+END_SRC
+これでも同様に動きますが、動作に必要あるかは不明です(もしかしたら =xz= がないと特定の機能だけ動かない可能性もある)。
+#+end_details
+
+** =guix import= で手抜きできる場合がある
+ビルドが必要なパッケージの定義を実際に行っていきました。それなりに大変だったと思います。
+使いたいパッケージの度にこれを行うのは億劫だという人もいると思います。
+実は、比較的簡単にパッケージを定義できる場合があります。それは、 =guix import= が利用できる場合です。
+
+=guix imort= は、インポーターというものを使って自動でパッケージ定義を書く機能です。
+インポーターの一覧など、詳しくは[[https://guix.gnu.org/en/manual/devel/en/guix.html#Invoking-guix-import][公式マニュアル(英語)]]にありますが、例えば以下のようにしてパッケージを生成できます。
+#+BEGIN_SRC shell
+guix import go gopkg.in/yaml.v2 --recursive
+#+END_SRC
+=go= というのがインポーターを表していて、[[https://proxy.golang.org/]]からメタデータを取得することでパッケージ定義を生成します。
+=--recursive= は依存を再帰的に辿ってパッケージ定義を生成するオプションで、付けないと依存が足りずにビルドがコケます。
+また、デフォルトでは標準出力に定義を吐くため、ファイルにでも流しこんでください。
+モジュール定義 や =#:use-module= は行ってくれないので、自分で行ってください。
+
+もちろん =guix import= だけで全てのパッケージ定義を賄うことはできないですし、これを用いてもビルドが失敗することはあります。
+それでも、依存先のパッケージなども含めて一気に定義できるのは有用ですし、
+ビルドが失敗しても今回の記事のようにビルドを成功へ導いてあげればよいです。
+是非利用してみてください。
+
+** 最後に
+今回の記事では、ビルドの必要なパッケージ定義を扱いました。
+これをマスターすればあなたも =guix= の玄人です。
+
+前回とおなじ締めですが、もしなにか質問などあれば、コメントなりメールなりで受け付けます。
+また、Guixの日本語コミュニティである[[https://guix-jp.gitlab.io/][Guix-jp]]もあります(ちなみに今回作ったパッケージと同じものが[[https://gitlab.com/guix-jp/channel][Guix-jp公式チャンネル]]にあります)。
+そちらには私以上のエキスパートの人がいますので、是非そちらもご興味あれば覗いてみてください。
+
 * TODO Guixのパッケージをつくってみよう-その3: どうしてもビルドできないときはバイナリを直接使ったパッケージを作る
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-6353e393-4e0b-6ad4-754b-0d84ebd31c97
