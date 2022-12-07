@@ -1372,6 +1372,7 @@ Lispに慣れていないと括弧に圧倒されるかもしれませんが、�
 それは上位の関数的なもの(マクロと呼び、関数と全く同様な呼び出し記法で呼び出す)が各引数を評価するかどうか自由に決めることができるからですが、
 理解できなくても構いません。ひとつずつ解説していくので安心してください。
 
+*** モジュール
 まずは、冒頭にある =define-module= の式をご覧ください。
 #+BEGIN_SRC scheme
   (define-module (your-channel-name packages fonts)
@@ -1390,6 +1391,7 @@ Lispに慣れていないと括弧に圧倒されるかもしれませんが、�
 厳密にどのパッケージがどこにあるか覚えていなくても問題にならないことが多いです。
 ちなみに =#:prefix license:= の行では、「このモジュールでエクスポートされた変数は =license:= という接頭辞を付けてアクセスする」という指定が付いています。
 
+*** パッケージ定義
 さて、いよいよパッケージ定義です。外側から順番にみていきましょう。
 #+BEGIN_SRC scheme
   (define-public font-cica
@@ -1422,6 +1424,8 @@ Lispに慣れていないと括弧に圧倒されるかもしれませんが、�
 なお、 =値= の部分は評価されます。
 
 少し話が逸れましたが、ここまで来ればあと少しです。 =package= コンストラクタに渡す引数をひとつひとつ見ていきましょう。
+
+**** nameフィールド、versionフィールド
 まずは =name= と =version= です。
 #+BEGIN_SRC scheme
   (package
@@ -1439,6 +1443,7 @@ Lispに慣れていないと括弧に圧倒されるかもしれませんが、�
 =version= はバージョンを表す文字列です。
 おそらく形式に決まりはないですが、先頭に"v"を付けずに"5.0.3"のようにする場合が多いです。
 
+**** home-pageフィールド、synopsisフィールド、descriptionフィールド
 一番説明が面倒な =source= と =build-system= を一旦飛ばして、 =home-page= 、 =synopsis= 、 =description= に移ります。
 #+BEGIN_SRC scheme
   (package
@@ -1455,6 +1460,7 @@ Lispに慣れていないと括弧に圧倒されるかもしれませんが、�
 この3つは割と見たまんまで、 =home-page= にはパッケージの対象のホームページを、 =synopsis= にはパッケージの1行の概要を、
 =description= はパッケージの説明を文字列で与えます。なお、 =description= に[[https://www.gnu.org/software/texinfo/manual/texinfo/texinfo.html][texinfo]]の記法を使えます。
 
+**** licenseフィールド
 次は =license= です。
 #+BEGIN_SRC scheme
   (package
@@ -1465,6 +1471,7 @@ Lispに慣れていないと括弧に圧倒されるかもしれませんが、�
 利用できるパッケージは[[https://git.savannah.gnu.org/cgit/guix.git/tree/guix/licenses.scm][公式レポジトリ]]で見ることができます。MITライセンスの名前は =expat= なので注意。
 モジュール定義の際に =#:prefix license:= を指定したため、 =silofl1.1= の代わりに =license:silofl1.1= となっています。
 
+**** sourceフィールド
 次は先程飛ばした =source= です。
 #+BEGIN_SRC scheme
   (package
@@ -1543,6 +1550,7 @@ URIから得られたファイルがパッケージを定義した人と一致�
 後者の場合、異なるコミットやタグにチェックアウトしている場合は異なるハッシュ値が返るので注意してください。
 また、裏技として、適当なハッシュ値を入れてパッケージをビルドすると「ハッシュ値が間違ってるよ」と言いながら実際のハッシュ値を教えてくれます。
 
+**** build-systemフィールド
 最後は =build-system= です。
 #+BEGIN_SRC scheme
   (package
@@ -1713,6 +1721,7 @@ agは高速なgrepとして開発されたCLIツールで、パッケージは[[
 前回はパッケージ定義の概要を説明するためにパッケージ定義を先に示しましたが、
 今回はパッケージを作るときの流れを実際に体験してもらうため、先に最終形を示すことはしません。
 
+*** モジュール
 まずは前回同様、モジュールを定義していきます。
 チャンネルの下の =your-channel-name/packages/ag.scm= に以下を書きましょう。
 #+BEGIN_SRC scheme
@@ -1725,6 +1734,7 @@ agは高速なgrepとして開発されたCLIツールで、パッケージは[[
 前回と異なるのは一行目の =(your-channel-name packages ag)= のファイル名にあたる最後の =ag= の部分くらいです。
 あと、今回はフォントではないので =(gnu build-system font)= を =#:use-module= しないようにしました。
 
+*** パッケージ定義
 次にパッケージ定義を書いていきます。今回は本家との名前の衝突を避けるために =my-ag= という名前にしましょう。
 ビルドのしかたは[[https://github.com/ggreer/the_silver_searcher#building-a-release-tarball][agのREADME]]に書いてあります。
 それによると、[[https://geoff.greer.fm/ag/][ここ]]にあるtarballからビルドする場合は以下のようなコマンドでインストールできるらしいです。
@@ -1765,6 +1775,7 @@ agは高速なgrepとして開発されたCLIツールで、パッケージは[[
 上記のフィールドのほとんどは[[https://blog.rocktakey.com/information-science/2022-770eb4b6-5c63-62d4-bbcb-475d92404603/][前回の記事]]と全く同様のため、詳細は省きますが、 =my-ag= という名前のパッケージを定義しています。
 基本的に上記に示したフィールドは全て必須であるため、これをテンプレートとして穴埋めすることでパッケージを作るのが手っ取り早いです。
 
+**** ビルドシステム
 さて、今書いた中で最も大事なフィールドは =(build-system gnu-build-system)= です。
 この変数の定義は =(guix build-system gnu)= というモジュールにあるので、このモジュールを =#:use-module= しておいてください。
 #+BEGIN_SRC scheme
@@ -1824,6 +1835,7 @@ GNU Guix公式レポジトリの[[https://git.savannah.gnu.org/cgit/guix.git/tre
   このフェイズも引数を用いて飛ばすことは可能ですが、ここでコケるのはライブラリの依存が足りていない証拠なので、
   「足りない」と言われた依存を適宜追加してください。
 
+**** 依存の解決
 さて、ビルドシステムの説明も終わったことなので、先程書いたパッケージを一旦ビルドしてみましょう。
 #+BEGIN_SRC scheme
   guix build -L /path/to/your/channel my-ag
@@ -1944,7 +1956,6 @@ No package 'libpcre' found
 
 先程と同様に =guix search= やブラウザでの検索を行うと、 =pcre= は =(gnu packages pcre)= モジュールにある =pcre= という変数に束縛されたパッケージに
 あるとわかります。ここでは詳細を省きます。 =pkg-config= のときと全く同じなので、是非実際に試してみてください。
-
 
 =LZMA= についても同様に検索しますが、どうも =lzma= という名前のパッケージはないようです。
 これでは埒があかないので、とりあえずビルドして =./configure= がどんなエラーを吐くか見てみましょう。
