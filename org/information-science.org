@@ -2386,8 +2386,33 @@ Nonguixの提供するビルドシステムを利用したパッケージを自�
      ...))
 #+END_SRC
 
+バイナリを直接コピーしてインストールするためには、
+当然「どのファイルをどこに配置するか」という情報を与える必要があります。
+そのような情報を =binary-build-system= に与えるには、 =#:install-plan= 引数を用います。
+この引数は ='(("source/filename" "/output/filename") ...)= のような値を取ります。
+="source/filename"= でダウンロードしたファイルを指定し、出力ディレクトリの ="/output/filename"= にコピーします。
+ここで指定するファイルは、ディレクトリでも構いません。
+それぞれの末尾にスラッシュが付いているかによって、コピーをよしなにしてくれます。
+末尾にスラッシュを付けると中身をそれぞれ個別に指定しているような意味になります。
+どのような組み合わせでどのようなコピーの仕方を得られるのかについての詳細は[[https://guix.gnu.org/en/manual/devel/en/guix.html#Build-Systems][公式マニュアル(英語)]]の
+=copy-build-system= を参照ください(=binary-build-system= は =copy-build-system= を継承しています)。
 
-ちなみに1つのディレクトリのみがあってその下に各種ファイルが存在しているようなものでも同様に扱えます。
+たとえば今回の場合、単ファイル =texlab= を =/bin/= の中へとコピーすればよいので、以下のようになります。
+末尾のスラッシュを忘れた場合(=("texlab" "/bin")=)、
+=texlab= というファイルを =bin= という名前にした上でルートディレクトリ =/= に置く、という指定になってしまいます。
+#+BEGIN_SRC scheme
+  (define-public my-texlab
+    (package
+     ...
+     (build-system binary-build-system)
+     (arguments '(#:install-plan
+                  '(("texlab" "/bin/"))))
+     ...))
+#+END_SRC
+
+さて、このパッケージをビルドしてみましょう。
+
+
 * TODO micを使って自分だけのuse-pacakgeを定義し、init.elを管理する
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-48b1a128-e423-8444-202b-3c25fd244198
