@@ -2229,6 +2229,165 @@ guix import go gopkg.in/yaml.v2 --recursive
   :END:
 [[https://qiita.com/advent-calendar/2022/guix][https://img.shields.io/badge/GNU%20Guix%20Advent%20Calendar%202022-7%E6%97%A5%E7%9B%AE-d60a34.svg?style=flat-square&logo=qiita]]
 
+** 序文
+[[https://blog.rocktakey.com/information-science/2022-c5b823db-a6b6-23a4-5783-c7741fd0f420/][前回の記事]]では、ビルドを伴うパッケージの作成を行いました。
+しかし、どうしてもビルドがうまくいかないこともあります。
+特に前回触れたインポーターがまだない他の既存パッケージマネージャで管理されたソフトウェアや、
+そもそもインポーターが介在する余地のないような独自のビルド手順を持つソフトウェアなどで、
+まだGNU Guixの公式チャンネルに実装されていない依存が大量にある場合には、
+多大な労力が必要になります。
+さらに言うと、我々が利用しているソフトウェアはソースが公開されているとは限りません。
+そのようなプロプライエタリなソフトウェアをソースコードからビルドすることは当然不可能です。
+このような場合、GNU Guixでソフトウェアの管理を行うことは不可能なのでしょうか。
+
+上記の話への回答は二つあります。
+GNU Guix(というよりGNUプロジェクトやFSFかも)の哲学に基づいて話すならば、
+「プロプライエタリなソフトウェアは使うべきではないし、ビルドしないという選択肢はない」です。
+彼等は自由ソフトウェア原理主義です。
+ソースコードが公開されておらず、中でなにをしているかわからないような自由でないソフトウェアは利用するべきではないと考えています。
+同様な理由で、自分でビルドしていないバイナリは本当に公開されているソースコードからビルドされたものかわからないから信用するべきではない、
+ということになります。
+
+私も自由ソフトウェアはよいものだと思っていますが、現実的にプロプライエタリなソフトウェアをただちに排除することは不可能ですし、
+たとえばインターネットを介して他人と競うようなゲームではコードの公開は不正に直結するでしょう。
+
+実際自由ソフトウェアしか利用できないのは不便なので、[[https://gitlab.com/nonguix/nonguix][Nonguix]]というコミュニティ及びチャンネルが存在します。
+このチャンネルでは不自由なソフトウェアやドライバが配信されています。
+これは非公式のものであり、GNUの哲学に反するものです。
+そのため、Nonguixはこのチャンネルは不自由なソフトウェアを推奨するものではないこと、
+IRCやメーリングリストなどの公式のGNU Guixコミュニケーションでは宣伝しないこと、とREADMEに書いています。
+言及自体を避けるものではないですが、GNUの哲学を尊重しましょうねという形です。
+このあたりのポリシーはコミュニティによって異なりますが、
+GNU直属のコミュニティではかなり厳格なので注意して発言する必要があります。
+
+このような経緯で、不自由なソフトウェアやドライバGNU Guixを扱うノウハウはすべてNonguixに集まっています。
+しかし、Nonguixは使い始めるための最低限のドキュメント(READMEにあるものが全て)しかありません。
+パッケージを利用するだけならチャンネルを登録するだけなので簡単ですが、
+不自由なソフトウェアのパッケージ(つまりバイナリを直接インストールするパッケージ)を作る知識を得るには
+Nonguixの他のパッケージ定義を真似るしかありません。
+
+そこで、ここでは、バイナリを直接インストールするパッケージの作り方を解説していきます。
+前回や前々回の記事とは違ってきちんとしたドキュメントに基づいているわけではなく、
+私も見様見真似でやっているところがあるので、説明が間違っている可能性が前の記事たちよりも少し高くなっていることにご留意ください。
+
+** Nonguixチャンネルを登録する(Nonguixチャンネルの提供するパッケージを利用したい場合のみ)
+先に、Nonguixのパッケージを利用する方法を述べておきます。
+この章の操作はNonguixのパッケージを利用するのには必要ですが、
+Nonguixの提供するビルドシステムを利用したパッケージを自分で作りたい場合には不要です
+(そのような場合は後述するようにチャンネルに依存を書く必要があるが、ユーザー側は明にチャンネルを登録する必要はない)。
+
+[[https://gitlab.com/nonguix/nonguix/][NonguixのREADME]]にあるのと似たように、以下を =~/.config/guix/channels.scm= に書きます。
+#+BEGIN_SRC scheme
+  (cons* (channel
+          (name 'nonguix)
+          (url "https://gitlab.com/nonguix/nonguix")
+          ;; Enable signature verification:
+          (introduction
+           (make-channel-introduction
+            "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+            (openpgp-fingerprint
+             "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+         ;; 前回つくったチャンネルはここに
+         (channel
+          (name 'your-channel-name)
+          (url "<your-channel-URL>"))
+         ;; その他のチャンネルを登録したい場合も続けて書ける
+         %default-channels)
+#+END_SRC
+今まで書いてきたものと違い、 =introduction= フィールドがあります。
+この =introduction= フィールドには署名が書かれています。
+[[https://blog.rocktakey.com/information-science/2022-770eb4b6-5c63-62d4-bbcb-475d92404603/#source%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89][前の記事]]で言及したハッシュ値の検証と意味合いとしては近く、
+偽物のチャンネルを掴まされても偽物だと気付けるようになっています。
+詳しくは[[https://guix.gnu.org/en/manual/devel/en/guix.html#Channel-Authentication][公式のマニュアル(英語)]]をご覧ください。
+
+** バイナリからインストールするパッケージを作成する
+この章では、バイナリから直接インストールするパッケージを作成していきます。
+例として、[[https://github.com/latex-lsp/texlab][texlab]]という言語サーバーについてのパッケージを作成します。
+
+*** 自分のチャンネルに依存チャンネルを追加する
+チャンネルの宣言は、チャンネル直下の =.guix-channel= に以下のように書いていました。
+#+BEGIN_SRC scheme
+  (channel
+   (version 0)
+   (url "<your-channel-URL>"))
+#+END_SRC
+今回はNonguixの提供するビルドシステムを利用したいので、チャンネルにNonguixへの依存を追加します。
+#+BEGIN_SRC scheme
+  (channel
+   (version 0)
+   (url "<your-channel-URL>")
+   (dependencies
+    (channel
+     (name nonguix)
+     (url "https://gitlab.com/nonguix/nonguix")
+     ;; Enable signature verification:
+     (introduction
+      (make-channel-introduction
+       "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+       (openpgp-fingerprint
+        "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))))
+#+END_SRC
+=dependencies= フィールドが追加されています。
+ここに依存するチャンネルを書いていきます。
+基本的には前節のチャンネル追加と同じものですが、1点だけ注意事項として、 =name= フィールドにクオート ='= がありません。
+前節のチャンネル追加では =(name 'nonguix)= としましたが、依存の追加では =(name nonguix)= となっています。
+このようになっている理由は不明ですが、ハマりすいので注意してください。
+
+*** パッケージを定義する
+前回同様、モジュールやパッケージ定義の雛形を最初に書きます。
+あらかじめ埋めておいたものを以下に示しますが、
+以下のフィールドは[[https://blog.rocktakey.com/information-science/2022-c5b823db-a6b6-23a4-5783-c7741fd0f420/][前回]]や[[https://blog.rocktakey.com/information-science/2022-770eb4b6-5c63-62d4-bbcb-475d92404603/][前々回]]の記事ですべて解説しているので、余力があれば自分で書いてみてください。
+ファイルは =your-channel-name/packages/texlab.scm= としましょう。
+#+BEGIN_SRC scheme
+  (define-module (your-channel-name packages texlab)
+    #:use-module (guix packages)
+    #:use-module ((guix licenses) #:prefix license:)
+    #:use-module (guix download))
+
+  (define-public my-texlab
+    (package
+     (name "my-texlab")
+     (version "4.3.0")
+     (source
+      (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/latex-lsp/texlab/releases/download/v"
+             version
+             "/texlab-x86_64-linux.tar.gz"))
+       (sha256
+        (base32
+         "0xrn9392yw7vy6f7yhbb37xm60igy5fv0mip4qgyzq5kfa3ni182"))))
+     (synopsis "An implementation of the Language Server Protocol for LaTeX")
+     (description
+      "Language Server providing rich cross-editing support for the LaTeX typesetting system.
+  The server may be used with any editor that implements the Language Server Protocol.")
+     (home-page "https://github.com/latex-lsp/texlab")
+     (license license:gpl3)))
+#+END_SRC
+名前は将来衝突した場合に混乱の元にならないよう =my-texlab= にしました。
+この記事がチュートリアル的な構成をとっているためにこのような変な命名を行っていますが、
+自分のチャンネルで実際にパッケージを定義をする場合は一般的な名前を付けても構いません。
+
+さて、今回ダウンロードしてくるファイルを展開したものはバイナリです。
+実際に展開して見てみましょう。
+#+BEGIN_SRC shell
+  wget https://github.com/latex-lsp/texlab/releases/download/v4.3.0/texlab-x86_64-linux.tar.gz
+  tar xvf texlab-x86_64-linux.tar.gz
+#+END_SRC
+すると、現在いるディレクトリに =texlab= というファイルが生成されています。
+つまりディレクトリではなく、ファイルが直に圧縮されていることがわかります。
+このバイナリをそのままインストールするには、 =binary-build-system= を用います。
+#+BEGIN_SRC scheme
+  (define-public my-texlab
+    (package
+     ...
+     (build-system binary-build-system)
+     ...))
+#+END_SRC
+
+
+ちなみに1つのディレクトリのみがあってその下に各種ファイルが存在しているようなものでも同様に扱えます。
 * TODO micを使って自分だけのuse-pacakgeを定義し、init.elを管理する
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-48b1a128-e423-8444-202b-3c25fd244198
