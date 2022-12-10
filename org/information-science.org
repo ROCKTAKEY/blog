@@ -2222,6 +2222,8 @@ guix import go gopkg.in/yaml.v2 --recursive
 また、Guixの日本語コミュニティである[[https://guix-jp.gitlab.io/][Guix-jp]]もあります。
 そちらには私以上のエキスパートの人がいますので、是非そちらもご興味あれば覗いてみてください。
 
+次回の記事は[[https://blog.rocktakey.com/information-science/2022-6353e393-4e0b-6ad4-754b-0d84ebd31c97/][こちら]]になります。
+
 * DONE Guixのパッケージをつくってみよう-その3: どうしてもビルドできないときはバイナリを直接使ったパッケージを作る
 CLOSED: [2022-12-11 Sun 04:20]
   :PROPERTIES:
