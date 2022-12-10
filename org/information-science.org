@@ -2222,7 +2222,8 @@ guix import go gopkg.in/yaml.v2 --recursive
 また、Guixの日本語コミュニティである[[https://guix-jp.gitlab.io/][Guix-jp]]もあります。
 そちらには私以上のエキスパートの人がいますので、是非そちらもご興味あれば覗いてみてください。
 
-* TODO Guixのパッケージをつくってみよう-その3: どうしてもビルドできないときはバイナリを直接使ったパッケージを作る
+* DONE Guixのパッケージをつくってみよう-その3: どうしてもビルドできないときはバイナリを直接使ったパッケージを作る
+CLOSED: [2022-12-11 Sun 04:20]
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-6353e393-4e0b-6ad4-754b-0d84ebd31c97
   :EXPORT_HUGO_TAGS: GNU-Guix Scheme nonguix
@@ -2385,6 +2386,7 @@ Nonguixの提供するビルドシステムを利用したパッケージを自�
      (build-system binary-build-system)
      ...))
 #+END_SRC
+このビルドシステムは =(nonguix build-system binary)= に定義されているので、 =#:use-module= しておきましょう。
 
 バイナリを直接コピーしてインストールするためには、
 当然「どのファイルをどこに配置するか」という情報を与える必要があります。
@@ -2411,7 +2413,171 @@ Nonguixの提供するビルドシステムを利用したパッケージを自�
 #+END_SRC
 
 さて、このパッケージをビルドしてみましょう。
+#+BEGIN_SRC shell
+  guix build -L /path/to/your/channel/ my-texlab
+#+END_SRC
+すると、ログの末尾で以下のようなエラーが出ると思います。
+#+begin_example
+  starting phase `validate-runpath'
+  validating RUNPATH of 1 binaries in "/gnu/store/wsacmf19wa4xdvniwza1vlrbhl3fk6jq-my-texlab-4.3.0/bin"...
+  /gnu/store/wsacmf19wa4xdvniwza1vlrbhl3fk6jq-my-texlab-4.3.0/bin/texlab: error: depends on 'libgcc_s.so.1', which cannot be found in RUNPATH ()
+  /gnu/store/wsacmf19wa4xdvniwza1vlrbhl3fk6jq-my-texlab-4.3.0/bin/texlab: error: depends on 'ld-linux-x86-64.so.2', which cannot be found in RUNPATH ()
+  error: in phase 'validate-runpath': uncaught exception:
+  misc-error #f "RUNPATH validation failed" () #f
+  phase `validate-runpath' failed after 0.0 seconds
+  Backtrace:
+             8 (primitive-load "/gnu/store/z4gvf8acdds19bphq0sq4bd768l…")
+  In guix/build/gnu-build-system.scm:
+      906:2  7 (gnu-build #:source _ #:outputs _ #:inputs _ #:phases . #)
+  In ice-9/boot-9.scm:
+    1752:10  6 (with-exception-handler _ _ #:unwind? _ # _)
+  In srfi/srfi-1.scm:
+      634:9  5 (for-each #<procedure 7ffff6043080 at guix/build/gnu-b…> …)
+  In ice-9/boot-9.scm:
+    1752:10  4 (with-exception-handler _ _ #:unwind? _ # _)
+  In guix/build/gnu-build-system.scm:
+     927:23  3 (_)
+     568:10  2 (validate-runpath #:validate-runpath? _ # _ #:outputs _)
+  In ice-9/boot-9.scm:
+    1685:16  1 (raise-exception _ #:continuable? _)
+    1685:16  0 (raise-exception _ #:continuable? _)
 
+  ice-9/boot-9.scm:1685:16: In procedure raise-exception:
+  RUNPATH validation failed
+  builder for `/gnu/store/db0x0apr340mjxc6z85dx09ra62k92ld-my-texlab-4.3.0.drv' failed with exit code 1
+  build of /gnu/store/db0x0apr340mjxc6z85dx09ra62k92ld-my-texlab-4.3.0.drv failed
+  View build log at '/var/log/guix/drvs/db/0x0apr340mjxc6z85dx09ra62k92ld-my-texlab-4.3.0.drv.gz'.
+  guix build: error: build of `/gnu/store/db0x0apr340mjxc6z85dx09ra62k92ld-my-texlab-4.3.0.drv' failed
+#+end_example
+見ての通りですが、かなり複雑で長いエラーメッセージが出ます。
+これはGNU Guix自体がGNU Guileという処理系で動いており、Guixの吐くエラーとGuileの吐くエラーとが両方表示されているためです。
+前半はGuixの吐くエラー、後半はGuileの吐くエラーです。
+Guileの出すエラーはScheme処理系自体のバックトレースでしかなく、パッケージのビルド過程そのものの情報はあまりありません。
+そのため、基本的には前半のエラーを読んでいくことになります。
+
+前半の部分を抜き出すと、以下のようになります。
+#+begin_example
+  /gnu/store/wsacmf19wa4xdvniwza1vlrbhl3fk6jq-my-texlab-4.3.0/bin/texlab: error: depends on 'libgcc_s.so.1', which cannot be found in RUNPATH ()
+  /gnu/store/wsacmf19wa4xdvniwza1vlrbhl3fk6jq-my-texlab-4.3.0/bin/texlab: error: depends on 'ld-linux-x86-64.so.2', which cannot be found in RUNPATH ()
+#+end_example
+=RUNPATH= というのはバイナリに含まれている情報で、依存する共有ライブラリを探すときにどのディレクトリの中を探すか、保持しています。
+GNU GuixはFHSという標準的なディレクトリ構成から逸脱しているため、この =RUNPATH= をあらかじめ書き換えておかないと、
+依存する共有ライブラリを見つけることができません。
+このエラーは、「 =texlab= バイナリは =libgcc_s.so.1= 及び =ld-linux-x86-64.so.2= という二つの共有ライブラリに依存しているけど、
+=RUNPATH= の中を探してもそんなファイルないよ？」ということを表しています。
+行末の =()= には本来パスが入るのですが、 =RUNPATH= を一切設定していないので空になっています。
+
+=RUNPATH= を書き換えるには、 =#:patchelf-plan= という引数を用います。例を見せたほうがわかりやすいと思うので、以下に示します。
+#+BEGIN_SRC scheme
+  (define-public my-texlab
+    (package
+     ...
+     (arguments '(#:install-plan
+                  '(("texlab" "/bin/"))
+                  #:patchelf-plan
+                  '(("texlab" ("glibc")))))
+     (inputs
+      (list glibc))
+     ...))
+#+END_SRC
+=#:patchelf-plan= には ='(("binary-filename" ("input1" "input2" ...)))= のような値を与えます。
+="binary-filename"= は =RUNPATH= を変更したいバイナリファイル、
+="input1"= や ="input2"= には =RUNPATH= に追加したいディレクトリを保持するパッケージの名前を書きます。
+すなわち、共有ライブラリを提供しているパッケージを指定すればよいです。
+もちろん、 =#:patchelf-plan= に指定するパッケージは =inputs= に指定する必要があります。
+
+上記の例では、 =glibc= を =inputs= に指定し、 =#:patchelf-plan= によって =texlab= の =RUNPATH= に追加しました。
+=glibc= は =ld-linux-x86-64.so.2= を提供します。
+さて、 =glibc= を提供するモジュール =(gnu packages base)= を =#:use-module= した上で、ビルドしてみましょう。
+#+BEGIN_SRC shell
+  guix build -L /path/to/your/channel/ my-texlab
+#+END_SRC
+すると、以下のようなエラーが見られます。
+#+begin_example
+  /gnu/store/2ga0imdyrgq5miqysvry8fbphjh4w4ky-my-texlab-4.3.0/bin/texlab: error: depends on 'libgcc_s.so.1', which cannot be found in RUNPATH ("/gnu/store/ayc9r7162rphy4zjw8ch01pmyh214h82-glibc-2.33/lib")
+#+end_example
+まず、行末の =RUNPATH ()= の中に =glibc= のパスが追加されています。
+さらに、 =RUNPATH= を追加したことで、さきほど出ていた =ld-linux-x86-64.so.2= についてのエラーが解消されています。
+
+次に、 =libgcc= についてのエラーを解消します。 =libgcc= は =gcc= のうち ="lib"= 出力で提供されています。
+この言い回しははじめてかもしれません。
+通常のパッケージは =out= 出力に書き込まれますが、ドキュメント部分やライブラリ部分がそれぞれ大きすぎて1つのパッケージにするのは不便な場合があります。
+そのような場合のために、 =doc= 出力や =lib= 出力など、複数の出力を持てるようになっています。
+なにも指定せずにインストールすれば =out= 出力だけがインストールされ、必要な人だけが別途 =lib= や =doc= などの別の出力をインストールできるようになっています。
+コマンドラインからインストールする場合、 =gcc:lib= のようにコロン区切りで出力の種類を指定できます。
+
+=inputs= で依存として指定する場合は、以下のように出力を指定できます。
+#+BEGIN_SRC scheme
+  (inputs
+   (list
+    glibc
+    (list gcc "lib")
+    ;; `(,gcc "lib") でも同義
+    ))
+#+END_SRC
+つまり、 =inputs= に与えるリストの各要素は、パッケージ定義そのものだけでなく
+「第一要素がパッケージ定義、第二要素が出力を表す文字列」のリストも用いることができます。
+
+=#:patchelf-plan= に与えるパッケージ名は、単にパッケージ名で構いません。すなわち、以下のようになります。
+#+BEGIN_SRC scheme
+  (define-public my-texlab
+    (package
+     ...
+     (arguments '(#:install-plan
+                  '(("texlab" "/bin/"))
+                  #:patchelf-plan
+                  '(("texlab" ("glibc"
+                               "gcc")))))
+     (inputs
+      (list
+       glibc
+       (list gcc "lib")))
+     ...))
+#+END_SRC
+
+さて、 =gcc= を提供するモジュール =(gnu packages gcc)= も =#:use-module= した上で、もう一度ビルドしてみましょう。
+#+BEGIN_SRC shell
+  guix build -L /path/to/your/channel/ my-texlab
+#+END_SRC
+
+ここまで正しくできていれば、ビルドが成功しているはずです。
+=my-texlab= がインストールされた環境に入って確かめてみましょう。 =--pure= でも =--container= でも構いません。
+#+BEGIN_SRC shell
+  guix shell -L /path/to/your/channel/ my-texlab --container -- texlab --version
+#+END_SRC
+=--= による環境での即時実行を使ってみました。該当環境で =texlab --version= を実行しています。ここでバージョンが出力されたら成功です!!
+
+** トラブルシューティング
+この章では、 =binary-build-system= を用いた場合に経験した諸トラブルを扱います。
+今後追記するかもしれません。
+
+*** =validate-runpath= フェイズでGuileがエラーを吐いてしまう
+=validate-runpath= において、以下のようなエラーが出ることがあります。
+#+begin_example
+  wrong-type-arg "struct-vtable" "Wrong type argument in position ~A (expecting ~A): ~S" (1 "struct" #f) (#f)
+#+end_example
+このエラーは、 =#:strip-binaries?= 引数に =#:f= を与えると解消します。
+この引数によって =strip=  フェイズが無効化されますが、これは主にデバッグ情報を取り除くものらしく、
+少なくとも私の手元ではこれによって動作に影響が出たことはありません。
+
+** 最後に
+今回はバイナリを直接インストールするパッケージの定義方法を説明しました。
+=binary-build-system= において、今回出てきた =ld-linux-x86-64.so.2= (=glibc=)と =libgcc= (=gcc:lib=)の解消はかなりの頻度で求められるので、
+覚えておくとよいです。
+
+重ね重ねになりますが、 =binary-build-system= は少なくとも GNU哲学において推奨されるものではないため、
+GNU直属のコミュニティで喧伝するのは控えたほうがよいです。
+しかし、一方で一般的なユーザーにとって便利であることも事実です。
+バイナリから直接インストールする危険性は念頭に置きつつも、上手に使っていきましょう。
+
+また、AppImageなどの一部のバイナリについては、この方法ではインストールできず、どうやってインストールするのか私にはわかりません。
+成功した方やなにか情報があるかたは気軽にご連絡ください。
+どうしてもパッケージの作成が成功しない場合のサブとして、[[https://flatpak.org/][Flatpak]]というパッケージマネージャを利用する人が多いようです。
+
+またまた前回と同じ締めですが、もしなにか質問などあれば、コメントなりメールなりで受け付けます。
+また、Guixの日本語コミュニティである[[https://guix-jp.gitlab.io/][Guix-jp]]もあります。
+そちらには私以上のエキスパートの人がいますので、是非そちらもご興味あれば覗いてみてください。
+もちろんそちらでも質問などをお受けいたします。
 
 * TODO micを使って自分だけのuse-pacakgeを定義し、init.elを管理する
   :PROPERTIES:
