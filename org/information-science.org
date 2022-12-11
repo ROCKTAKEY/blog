@@ -1933,7 +1933,6 @@ hint: Did you forget `(use-modules (gnu packages pkg-config))'?
 このようにモジュールを指定せずに変数を使ってしまっても、かなりの確率で教えてくれます。
 勘で依存パッケージの変数を書いてビルドして、ヒントでどこにあるか確認するという横着もできてしまいます(私もけっこうやる)。
 #+BEGIN_SRC scheme
-scheme
   (define-module (your-channel-name packages ag)
     #:use-module (guix packages)
     #:use-module ((guix licenses) #:prefix license:)
