@@ -1,7 +1,7 @@
 +++
 title = "Emacsのパッケージをつくってみよう"
 author = ["ROCKTAKEY"]
-lastmod = 2022-12-15T03:44:51+09:00
+lastmod = 2022-12-16T10:40:57+09:00
 tags = ["Emacs", "Emacs-Lisp"]
 draft = true
 +++
@@ -802,4 +802,128 @@ Emacs Lispは書けるけど、パッケージの作法がよくわからない�
     これによって、変数を一切リークさせずにマクロ定義行うことができました。
 
 
-### テスト {#テスト}
+### test/sample-test.el {#test-sample-test-dot-el}
+
+このファイルにはテストを書き入れます。
+パッケージ開発を行うにあたって、テストは重要です。
+テストをきちんと書いておけば、既存の機能が壊れてないことを担保しながら、
+安全に新しい機能を追加していくことができます。
+
+```emacs-lisp
+;;; sample-test.el --- Test for sample
+
+;; Copyright (C) 2022  yourname
+
+;; Author: yourname <youremail@example.com>
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; Test for sample
+
+;;; Code:
+
+(require 'ert)
+
+(require 'undercover)
+(undercover "*.el"
+            (:report-format 'codecov)
+            (:report-file "coverage-final.json")
+            (:send-report nil))
+
+(require 'sample)
+
+
+
+
+(provide 'sample-test)
+;;; sample-test.el ends here
+```
+
+始まりと終わりの部分はメインのファイルと全く同じです。
+メインのファイルではないのでヘッダではバージョンなどのパッケージそのものの情報は省略され、
+筆者など最低限の情報だけが書かれています。
+
+```emacs-lisp
+(require 'ert)
+```
+
+`ert` はテストを定義・実行するための標準パッケージです。
+テストの定義は `ert-deftest` を利用して以下のように書きます。
+
+```emacs-lisp
+(ert-deftest sample-test-name ()
+  "docuent."
+  ...)
+```
+
+基本的には関数定義と同様です。
+ドキュンメント `"documents."` は任意で、テストにドキュンメントを付けている人はあまり見たことがありません。
+本当は付けたほうがよいかもしれないですが、何をテストしているのか名前や内容から読み取れず、
+ドキュンメントがないと理解できないテストとなっている場合はテストが複雑すぎるかもしれません。
+また、テストの名前 `sample-test-name` は関数の名前空間とは独立ですが、
+テストを管理する単一の名前空間に存在することに留意し、関数や変数と同様にパッケージ名の接頭辞 `sample-` を
+付けてください。なにも思いつかなければテスト対象の関数名をそのまま利用することもできます。
+なお、引数 `()` は `ert-deftest` を関数っぽく見せるためだけに存在しているダミー引数で常に空リストです。
+
+`...` の部分にテストの内容を書きます。ここには任意の式を書くことができます。
+テストを実際に行う式は以下の4種類があります。
+
+`should`
+: `(should 式)` のように用い、 `式` が非 `nil` な値を返せばテストは成功、そうでなければ失敗します。
+
+`should-not`
+: `(should-not 式)` のように用い、 `式` が `nil` を返せばテストは成功、そうでなければ失敗します。
+
+`should-error`
+: `(should-error 式)` のように用い、 `式` が実行時にエラーを吐けば成功、そうでなければ失敗します。
+
+式
+: そのまま式を書くと、エラーを吐かなければ成功、エラーを吐けば失敗します。
+
+たとえば、前に出てきた関数 `sample-macro-name-8` に引数 `1` と `2` を与えると `16` を返し、
+`2` と `5` を与えると `80` を返すことをテストするには以下のように書きます。
+
+```emacs-lisp
+(ert-deftest sample-macro-name-8 ()
+  (should (eq (sample-macro-name-8 1 2) 16))
+  (should (eq (sample-macro-name-8 2 5) 80)))
+```
+
+ただし、マクロの変数リークはこのようなテストでは検知できないので、依然として気をつける必要があります。
+
+テストを今動かしているEmacs上で実行するためには、 `ert` コマンドを使います。
+`M-x ert` とすると、どのテストを実行するか聞かれます。 `t` を渡せば現在定義されている全てのテストを実行し、
+テストの名前を渡せばそれを実行します。
+たとえば `sample-macro-name-8` とテスト自体を評価した状態で `ert` を渡し、 `sample-macro-name-8` と入力すると、
+以下のような `*ert*` バッファが得られるはずです。
+
+```text
+Selector: sample-macro-name-8
+Passed:  1
+Failed:  0
+Skipped: 0
+Total:   1/1
+
+Started at:   2022-12-16 10:38:54+0900
+Finished.
+Finished at:  2022-12-16 10:38:54+0900
+
+.
+```
+
+上段にはテスト結果のまとめが書いてあります。
+中段には実行のログが書いてあります。
+下段には `.` と書いてあります。
