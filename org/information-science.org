@@ -1245,7 +1245,8 @@ Guix Systemを導入し、さらにこの記事を書くにあたり、 [[https:
 
 また、Taijuさんと共に[[https://join.slack.com/t/guix-jp/shared_invite/zt-17aoza5yo-KAVDj5aPPwsJ9X7e4lJteg][Guix-jp]]というGNU Guix及びGNU Guix Systemの日本語コミュニティを立ち上げました。
 すこしでもGuixに興味を持った方は、是非遊びにきてください!!
-* TODO Emacsのパッケージをつくってみよう
+* DONE Emacsのパッケージをつくってみよう
+CLOSED: [2022-12-19 Mon 04:32]
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-df7edb45-d0ce-7cd4-5c6b-1a3efa8b4b4c
   :EXPORT_HUGO_TAGS: Emacs Emacs-Lisp
@@ -1260,6 +1261,10 @@ Emacs Lispを利用してカスタマイズすることがあるかと思いま�
 一方、ある程度大きくなった機能をパッケージへと切り出しておけば、履歴も設定ファイルとは別に管理できますし、
 人に使ってもらうのも簡単です。この記事では、Emacs Lispのパッケージの雛形を詳細に解説し、
 みなさんがパッケージを作る一助にしたいと思います。
+
+なお、この記事は雛形の展開結果を元に話を進めていますが、この記事はこの雛形を利用して欲しいがために作ったというより、
+パッケージを作り方を伝授するために作ったものです。なので、別にこのテンプレートを利用しなくてもよいですし、
+しなくてもよいように説明します。
 
 ** 今回利用するサービス及びソフトウェア
 *** 外部サービス
@@ -1290,6 +1295,8 @@ Emacs Lispを利用してカスタマイズすることがあるかと思いま�
   - Emacs Lispのプロジェクトの依存を管理するパッケージマネージャ及び便利ツール
   - グローバル環境(つまりユーザーのEmacs環境)を汚さずにパッケージの依存をインストールできる(=npm= みたいなもの)
   - 類似ツールとして[[https://github.com/cask/cask][Cask]]などがある
+  - インストールは簡単で =git clone https://github.com/conao3/keg.el.git ~/.keg= を実行して =~/.keg= ディレクトリに =keg.el= をインストールした後、
+    =PATH=$HOME/.keg/bin:$PATH= としてパスを通すだけです。
 - [[https://github.com/cookiecutter/cookiecutter][Cookiecutter]]
   - テンプレートを展開するソフトウェア
   - [[https://docs.github.com/ja/repositories/creating-and-managing-repositories/creating-a-template-repository][GitHubのテンプレート機能]]はレポジトリの内容をまるまるコピーすることしかできないため、
@@ -1526,7 +1533,7 @@ Emacs自体がGPLv3の下で公開されていることもあり、Emacs Lispの
   ;;; sample.el --- This is sample for package  -*- lexical-binding: t; -*-
 
   ;; Copyright (C) 2022  yourname
-nn
+
   ;; Author: yourname <youremail@example.com>
   ;; Keywords: tools
 
@@ -1948,14 +1955,15 @@ Emacs Lispには名前空間が実質的に存在せず、従って公開変数�
   (provide 'sample-test)
   ;;; sample-test.el ends here
 #+END_SRC
-始まりと終わりの部分はメインのファイルと全く同じです。
-メインのファイルではないのでヘッダではバージョンなどのパッケージそのものの情報は省略され、
+始まりと終わりの部分はメインのファイルとほぼ同じです。
+単なるテストファイルなので、ヘッダではバージョンなどのパッケージそのものの情報は省略され、
 筆者など最低限の情報だけが書かれています。
 
 #+BEGIN_SRC emacs-lisp
     (require 'ert)
 #+END_SRC
 =ert= はテストを定義・実行するための標準パッケージです。
+ドキュメントは[[https://www.gnu.org/software/emacs/manual/html_node/ert/][ここ]]にあります。
 テストの定義は =ert-deftest= を利用して以下のように書きます。
 #+BEGIN_SRC emacs-lisp
   (ert-deftest sample-test-name ()
@@ -2007,7 +2015,470 @@ Emacs Lispには名前空間が実質的に存在せず、従って公開変数�
 #+end_example
 上段にはテスト結果のまとめが書いてあります。
 中段には実行のログが書いてあります。
-下段には =.= と書いてあります。
+下段には =.= と書いてあります。特にこの下段にはテストの一覧が1テスト1文字で書かれています。
+=.= は成功、 =F= は失敗を表します。
+今回は1つしかテストを実行していないので1文字ですが、複数のテストを同時に行えば =...= や =..F= のように
+複数の文字が横に連なります。
+
+**** カバレッジ計測
+テンプレートには以下の記述があります。
+#+BEGIN_SRC emacs-lisp
+  (require 'undercover)
+  (undercover "*.el"
+              (:report-format 'codecov)
+              (:report-file "coverage-final.json")
+              (:send-report nil))
+#+END_SRC
+[[https://github.com/undercover-el/undercover.el][undercover.el]]は、テストにおけるカバレッジ(コード全体の行のうちどれくらいの割合がテストされているか)を計測してくれるパッケージです。
+=undercover= マクロでカバレッジの出力フォーマットやファイル名を指定しています。
+今回はCodecovというサービスにカバレッジを送信するので、 ='codecov= をフォーマットとして指定しています。
+Codecovへのカバレッジレポートの送信は後述するGitHub Actionsで行うので、 =:send-report= には =nil= を指定します。
+その他のオプションの詳細は[[https://github.com/undercover-el/undercover.el][undercover.elのREADME]]をご覧ください。
+
+=undercover= パッケージは、 =undercover= 節よりも後に =require= したものを対象にカバレッジ計測を行うこと、
+及びバイトコンパイル後の =.elc= ファイルではカバレッジ計測できないこと(行の情報が消失している)を留意してください。
+後述する =keg run test-all=  ではバイトコンパイル前後の両方でテストを行いますが、カバレッジを計測できるのはバイトコンパイル前のみです。
+
+**** テストにおける注意点
+***** 環境を汚さない
+テストを行う際は、環境を汚さないよう配慮しましょう。
+これは地球の環境問題への配慮ではなく、あなたのEmacsの実行環境のことを指しています。
+それには「あなたの作っているパッケージ自体」も含みます。
+テストにおいて、あなたの作ったパッケージのグローバル変数や、
+他のパッケージのグローバル変数を直接変更するのは控えましょう。
+
+=let= を利用することで一時的にグローバル変数を別の値に束縛しておけます。
+これを用いると、一時的にグローバル変数をローカル変数のように扱えます。
+つまり、スコープを抜けると元の値に戻ること、 =let= の内側での該当変数の変更は一切グローバルに波及しないことを保証します。
+ただし、Emacs Lispにおけるリストは参照渡しなので、あるリストの途中を変更したときに、
+同じリストの参照を保持している変数の値は実質的に変更されます。
+
+この束縛は =let= 環境の内側のすべての関数に波及します。つまり、 =let= 内側で呼びだした関数が該当変数を変更した場合も、
+=let= で定義したローカル変数のほうしか変更できず、グローバルな値は変更されません。
+これはまさにダイナミックバインディング(動的束縛)の効果になります。
+実はEmacsでは、グローバル変数として存在する変数と全く同じ変数を =let= で束縛すると、自動で動的束縛にします。
+これにより、 =lexical-binding: t= とした場合でも今回のようなグローバル変数のスコープ内変更を行えるようになっています。
+
+他にも =with-temp-buffer= や =skip-unless= など、環境を汚さないための手法がいくつかありますが、
+そこまで頻度はあまり高くないので、ここでは解説しません。
+[[https://www.gnu.org/software/emacs/manual/html_node/ert/Tests-and-Their-Environment.html][公式のマニュアル]]をご覧ください。
+
+*****  マクロ定義における注意
+マクロをテストする場合、マクロはテスト定義の時点で展開されてしまうため、
+マクロを定義しなおしたらテストも定義しなおさねばなりません。
+また、場合によっては、マクロ展開を行った式の返り値のテストだけでなく、
+=macroexpand-1= などの展開結果を =equal= で比較するなど、マクロ展開そのもののテストを行うこともあります。
+
+*** Keg
+このファイルでは[[https://github.com/conao3/keg.el][keg.el]]というツールのプロジェクト毎の設定が書かれています。
+この節では =keg.el= に限らず、Emacsプロジェクトにおいて導入しておくと便利なCLIツールについて書いています。
+
+ここでは一旦例として =keg.el= を用いますが、他も大抵の仕組みは同じだと思います。
+他には[[https://github.com/cask/cask][cask]]が有名です。
+#+BEGIN_SRC emacs-lisp
+  (source gnu nongnu melpa)
+
+  (package (sample
+            (recipe . (:fetcher github :repo "ROCKTAKEY/sample-emacs-lisp"))))
+
+  (dev-dependency undercover)
+
+  (script
+   (test
+    (let ((test-files (mapcar (lambda (file) (file-relative-name file "."))
+                              (directory-files "test" t "\\.el$"))))
+      (keg-shell
+       `("keg" "emacs" "--batch" "-Q" "-L" "."
+         ,@(mapcar (apply-partially #'concat "--load=") test-files)
+         "-f" "ert-run-tests-batch-and-exit"))))
+   (test-all
+    (keg-shell "keg clean-elc"
+               "keg run test"
+               "keg build"
+               "keg run test"
+               "keg clean-elc")))
+#+END_SRC
+=(source gnu nongnu melpa)= ではソースとなるパッケージのアーカイブを指定しています。
+メインのEmacs Lispファイルのヘッダに書いた依存を、このソースから落としてきます。
+それぞれ[[https://elpa.gnu.org/][GNU ELPA]]、[[https://elpa.nongnu.org/][NonGNU ELPA]]、[[https://melpa.org/#/][MELPA]]から落とすことを指定しています。
+これらは有名どころのパッケージアーカイブです。
+
+=package= 節ではレシピ等の情報を指定しています。
+=keg.el= は複数パッケージに対応しており、 =(sample ...)= によってパッケージ =sample= についての設定を行うようになっています。
+=...= の部分では =alist= によって情報を指定します。
+たとえば =(recipe . ...)= でレシピの情報を指定しています。
+レシピはツールによって対応しているものとしていないものがあります。
+レシピとは、パッケージをビルドする際の情報をリストにまとめたものです。
+このあたりは若干方言がありますが、基本文法は[[https://github.com/melpa/melpa#recipe-format][MELPAの説明]]がわかりやすく、よく用いられています。
+=plist= のうち、代表的なものを以下に示します。
+- =:fetcher= :: ソースコードをどこから取ってくるかです。今回はGitHubでホストしているので =github= としています。
+  他にも =gitlab= や単に =git= のようなものも指定できます。
+- =:repo= :: レポジトリの名前です。 =:fetcher= で =gitlab= や =github= を指定した場合にのみ用います。
+  =git= の場合は かわりに =:url= でフルのURLを指定してください。
+- =:files= :: パッケージに含めるファイルの正規表現のリスト。
+  通常は指定しなくてもよしなにしてくれますが、複数パッケージを含む場合は明示的にファイル名を指定します。
+
+=dev-dependency= は、開発においてのみ必要な依存です。
+ここでは前述のカバレッジ計測ツールである =undercover= を指定しています。
+
+=(script ...)= では、 =keg run= コマンドで実行するEmacs Lispの式が書けるようになっています。
+ツールにより似たような機能があるかどうか、書けるのがEmacs Lispかシェルスクリプトかのような違いはあると思います。
+ここでは =test= と =test-all= の二つのコマンドを定義しています。それぞれ =keg run test= と =keg run test-all= で実行できます。
+- =test= :: こちらでは、まずは =test/= 以下にあるテストファイルを全て列挙し、それを =--load= と結合して =keg emacs --batch= に渡しています。
+  =--load= にファイルを渡すことで、Emacs Lispファイルがロードされます。
+  また、 =-L .= によってパッケージ自体を読み込んでいます。 =-L= は =--load== とほとんど同じで、後ろに渡されたファイルをロードします。
+  同時に =-f ert-run-tests-batch-and-exit= を渡し、定義されたテストを実行しています。 =-f= は後ろに渡された関数を実行します。
+
+  なお、 =keg emacs= は単にEmacsを実行するものですが、環境変数 =EMACSLOADPATH= を通じてEmacsに =load-path= を伝えます。
+  この変数を渡さないと、Emacsは依存をどこにインストールしたのかを知ることができません。
+  どのツールにもこの機能は実装されているかと思います。
+
+  =keg-shell= については後述します。
+
+- =test-all= :: こちらでは、 =keg-shell= という1つの関数のみを呼び出しています。
+  この関数は与えられた文字列をシェルコマンドとして順に実行していきます。
+  文字列の代わりにリストを与えることもできます。その場合、各要素(文字列)をエスケープした上で結合し、シェルコマンドとして実行します。
+
+  ここでは3種類、5つの文字列を与えています。 =keg clean-elc= はバイトコンパイル後のファイルの削除、
+  =keg run test= は先ほど定義した =test= スクリプトの実行、 =keg build= はバイトコンパイルを行います。
+
+**** CLIツールによるテストの実行
+テストの章ではテストを実行中のEmacsで実行しましたが、使用中の環境は我々の設定が読み込まれていたり、
+逆に開発中のパッケージを評価し忘れていたりと、不確実性がそこそこにあります。
+そこで、コマンドラインツールを利用してテストを実行していきましょう。
+今回利用しているのは =keg.el= でした。先ほど =script= で定義した =test= を使ってテストを走らせましょう。
+#+BEGIN_SRC shell
+  keg run test
+#+END_SRC
+はじめには =keg install= と同等の処理が入ります。これは依存のインストールを行います。
+必要であれば先に実行しておくとよいです。
+なお、そこでいくつかの警告が出力されますが、それは依存先によるものなので、無視してよいです。
+もし気になるのであれば、依存先にコントリビュートしに行きましょう。
+
+次に、 =keg run test= の処理が入ります。ここではテストを行います。以下の部分がメインです。
+#+begin_example
+  Exec command: keg emacs --batch -Q -L . --load\=test/sample-test.el -f ert-run-tests-batch-and-exit
+  Exec command: emacs --batch -Q -L . --load\=test/sample-test.el -f ert-run-tests-batch-and-exit
+  Running 1 tests (2022-12-18 04:04:28+0900, selector ‘t’)
+     passed  1/1  sample-macro-name-8 (0.000074 sec)
+
+  Ran 1 tests, 1 results as expected, 0 unexpected (2022-12-18 04:04:28+0900, 0.000188 sec)
+#+end_example
+=*ert*= バッファとそうかわらないので、あまり説明することはないです。テストが失敗した場合は以下のように表示されます。
+#+begin_example
+  Exec command: keg emacs --batch -Q -L . --load\=test/sample-test.el -f ert-run-tests-batch-and-exit
+  Exec command: emacs --batch -Q -L . --load\=test/sample-test.el -f ert-run-tests-batch-and-exit
+  Running 1 tests (2022-12-18 04:08:19+0900, selector ‘t’)
+  Test sample-macro-name-8 backtrace:
+    ert-fail(((should (eq (sample-macro-name-8 1 2) 13)) :form (eq 16 13
+    (if (unwind-protect (setq value-2 (apply fn-0 args-1)) (setq form-de
+    (let (form-description-4) (if (unwind-protect (setq value-2 (apply f
+    (let ((value-2 'ert-form-evaluation-aborted-3)) (let (form-descripti
+    (let* ((fn-0 #'eq) (args-1 (condition-case err (let ((signal-hook-fu
+    (let ((lexical-binding nil)) (let* ((fn-0 #'eq) (args-1 (condition-c
+    (lambda nil (let ((lexical-binding nil)) (let* ((fn-0 #'eq) (args-1
+    ert--run-test-internal(#s(ert--test-execution-info :test #s(ert-test
+    ert-run-test(#s(ert-test :name sample-macro-name-8 :documentation ni
+    ert-run-or-rerun-test(#s(ert--stats :selector t :tests [#s(ert-test
+    ert-run-tests(t #f(compiled-function (event-type &rest event-args) #
+    ert-run-tests-batch(nil)
+    ert-run-tests-batch-and-exit()
+    command-line-1(("-L" "." "--load=test/sample-test.el" "-f" "ert-run-
+    command-line()
+    normal-top-level()
+  Test sample-macro-name-8 condition:
+      (ert-test-failed
+       ((should
+         (eq
+      (sample-macro-name-8 1 2)
+      13))
+        :form
+        (eq 16 13)
+        :value nil))
+     FAILED  1/1  sample-macro-name-8 (0.000108 sec)
+
+  Ran 1 tests, 0 results as expected, 1 unexpected (2022-12-18 04:08:19+0900, 0.095499 sec)
+
+  1 unexpected results:
+     FAILED  sample-macro-name-8
+
+  Script "test" exit abnormally with status code 1
+#+end_example
+まずは長いバックトレースが表示されます。バックトレースはEmacsがS式を評価し、エラーを起こすまでの軌跡です。
+バックトレースは名前の通り、下から上に向かって時間が進むことに注意してください。
+
+その後、テストの条件がどう失敗したのかを示してあります。
+その部分を抜粋します。
+#+begin_example
+  Test sample-macro-name-8 condition:
+      (ert-test-failed
+       ((should
+         (eq
+      (sample-macro-name-8 1 2)
+      13))
+        :form
+        (eq 16 13)
+        :value nil))
+     FAILED  1/1  sample-macro-name-8 (0.000108 sec)
+#+end_example
+見方は割とそのままで、 =:form= が実行された式、 =:value= が返された値です。
+式の比較を =equal= で行った場合は、 =:explanation= として追加で情報が与えられます
+(=eq= はプリミティブの比較及び参照の比較しか行わないが、 =equal= はリストの要素を掘って比較する)。
+リストの長さが違うとか、リストのどこの要素が異なる、というような情報が得られます。
+
+なお、 =keg run test= は単にテストを実行するだけですが、 =keg run test-all= はバイトコンパイルする前とした後の両方でテストを行います。
+使い方はほとんど同じです。 CIなどでは特に理由がなければ =keg run test-all= を使うとよいです。
+
+*** .github/workflows/test.yml
+このファイルでは、GitHub Actionsによるテストなどの実行をするための流れを記述しています。
+GitHub Actionsにおいて1つの環境で実行されるフローをジョブと言い、それをいくつか集めた実行単位をワークフローと呼びます。
+1つのワークフローは必ず同じ操作で誘発され、同時に実行されます。
+#+begin_src yaml
+  name: test
+
+  on: [push, pull_request]
+#+end_src
+=name= でこのワークフローの名前を指定します。
+=on= では、どのような操作がこのワークフローの実行を誘発するかを指定します。
+=push= はコミットのプッシュを行ったとき、 =pull_request= プルリクエストを行ったときにこのワークフローを実行することを表します。
+
+#+begin_src yaml
+  jobs:
+    test:
+      ...
+    lint:
+      ...
+#+end_src
+=jobs= には各ジョブの内容を指定します。
+1つ下にキーとして名前を書きます。ここでは =test= と =lint= の2つをジョブとして指定します。
+
+#+begin_src yaml
+    test:
+      runs-on: ${{ matrix.os }}
+      continue-on-error:
+        ${{ contains(fromJson('["snapshot"]'), matrix.emacs_version) }}
+      strategy:
+        fail-fast: false
+        matrix:
+          os:
+            - ubuntu-latest
+
+          emacs_version:
+            - '24.1'
+            - '24.2'
+            - '24.3'
+            - '24.4'
+            - '24.5'
+            - '25.1'
+            - '25.2'
+            - '25.3'
+            - '26.1'
+            - '26.2'
+            - '26.3'
+            - '27.1'
+            - '27.2'
+            - '28.1'
+            - '28.2'
+            - 'snapshot'
+#+end_src
+先に =strategy.matrix= について説明します。
+=strategy.matrix.xxx= にリストを渡すと、 その数だけジョブが生成されます。
+それぞれのジョブでは =matrix.xxx= にリストの各要素の値が束縛されるため、その値を利用することで様々な条件でジョブを実行することができます。
+また、 =matrix.xxx= と =matrix.yyy= のように複数設定した場合、全ての組み合わせのジョブが生成されます。
+これが =matrix= と言われている所以です。
+
+=${{...}}= はGitHub Actions特有の文法で、関数の実行や変数からの値の取り出しに用います。
+
+
+**** test
+ここで =test:= の先頭まで戻ります。
+=runs-on= では、そのジョブを実行するOSを指定します。Ubuntuだけでなく、macOSやWindowsも利用可能です。
+ここでは後からOSを追加できるよう、 =${{ matrix.os }}= として =matrix.os= に =ubuntu-latest= を指定しています。
+もしmacOSでもテストしたいのであれば、以下のように =macos-latest= を追加してください。
+ただし、Ubuntuに比べてかなり遅く、CIを終えるのにかなり時間がかかるようになります。
+#+begin_src yaml :hl_lines 9
+    jobs:
+      test:
+        runs-on: ${{ matrix.os }}
+        # ...
+        strategy:
+          matrix:
+            os:
+              - ubuntu-latest
+              - macos-latest
+#+end_src
+
+=continue-on-error= を =true= にすると、そのジョブが失敗しても成功したかのように扱ってくれます。
+#+begin_src yaml :hl_lines 4-5
+  jobs:
+    test:
+      # ...
+      continue-on-error:
+        ${{ contains(fromJson('["snapshot]'), matrix.emacs_version) }}
+#+end_src
+ここでは ~${{ contains(fromJson('[snapshot"]'), matrix.emacs_version) }}~ という複雑な条件を与えていますが、
+簡単に言えば =matrix.emacs_version= が =snapshot= の場合だけ失敗を許容します。
+現状 =snapshot= のみなので単に ~${{ matrix.emacs_version == "snapshot" }}~ でも構いませんが、
+たまに無視したいバージョンを追加したい場合があるので、手軽に追加できるようこのような書きかたになっています。
+
+=strategy.fail-fast= に =true= を指定することで、ジョブが1つ失敗しても他のジョブを最後まで実行します。
+デフォルトでは =true= となっていて、1つのジョブが失敗すると残りのジョブは自動で中断されてしまいます。
+これにはリソースを節約するメリットがある一方、
+全ての環境の組み合わせでの結果の成否を得ることができないため、環境要因の切り分けがしにくくて不便です。
+そのため、ここで =false= に指定します。
+#+begin_src yaml :hl_lines 4
+  jobs:
+    test:
+      strategy:
+        fail-fast: false
+#+end_src
+
+ここでは =matrix.emacs_version= の設定をしています。
+もしサポートするEmacsバージョンを上げる場合は、ここも適宜削ってください。
+#+begin_src yaml :hl_lines 5-21
+  jobs:
+    test:
+      strategy:
+        # ...
+        emacs_version:
+          - '24.1'
+          - '24.2'
+          - '24.3'
+          - '24.4'
+          - '24.5'
+          - '25.1'
+          - '25.2'
+          - '25.3'
+          - '26.1'
+          - '26.2'
+          - '26.3'
+          - '27.1'
+          - '27.2'
+          - '28.1'
+          - '28.2'
+          - 'snapshot'
+#+end_src
+
+=steps= がジョブのメインの処理を書く部分です。
+#+begin_src yaml
+  jobs:
+    test:
+      # ...
+      steps:
+        - uses: actions/checkout@v3
+        - uses: purcell/setup-emacs@master
+          with:
+            version: ${{ matrix.emacs_version }}
+        - uses: conao3/setup-keg@master
+
+        - run: keg install
+        - run: keg run test-all
+        - uses: codecov/codecov-action@v2
+#+end_src
+主に利用するのは =uses= と =run= の2種類です。
+=run= は単に与えたシェルコマンドを実行します。
+=uses= は、他の人が定義したActionを実行します。
+Actionとは、ワークフローで不特定多数の人に利用してもらうことを想定した実行単位で、引数を取ることもできます。
+環境変数を通じてAPIトークンなどにアクセスできる場合があるので、信用のできるものだけを利用してください。
+なお、 =@= の後ろにブランチやタグを指定することである特定のバージョンのActionsを利用することができます。
+
+ここで利用しているActionは以下の通りです。
+- =actions/checkout= :: 当該レポジトリの当該コミットにチェックアウト(つまりテスト対象のコミットをファイルシステムに展開)する。
+- =purcell/setup-emacs= :: Emacsを環境にインストールする。 =version= 引数によりインストールするEmacsのバージョンを指定できる。
+- =conao3/setup-keg= :: =keg.el= を環境にインストールする。
+- =codecov/codecov-action= :: テストのカバレッジをCodecovに送信する。
+
+=run= に指定されている =keg install= と =keg run test-all= については前述のとおりで、それぞれ依存のインストール、
+バイトコンパイル前後のテスト実行を担います。
+
+**** lint
+ほとんどはtestと同じなので説明するところはあまりありません。
+唯一説明していないのは、 =keg lint= の部分です。
+#+begin_src yaml :hl_lines 11
+  jobs:
+    lint:
+      runs-on: ubuntu-latest
+      continue-on-error: ${{ true }}
+      steps:
+        - uses: actions/checkout@v1
+        - uses: purcell/setup-emacs@master
+          with:
+            version: '28.2'
+        - uses: conao3/setup-keg@master
+        - run: keg lint
+#+end_src
+シェルコマンド =keg lint= は、以下の3つの操作を行います。
+これらの操作がエラーを吐かないことは動作自体に必須ではないですが、パッケージとしてはエラーや警告を吐かないことが望ましいです。
+なんらかのエラーや警告が発生する場合、行儀の悪いパッケージとみなされる場合があります(例えばMELPAでは直すまで登録できません)。
+特に =package-lint= は依存周りの問題を検出してくれるので、従ったほうがよいです。
+なお、他のツールでも同様にこのような機能がついていると思われます。場合によっては追加でさらにインデント周りをやってくれたりするかもしれません。
+- [[https://github.com/purcell/package-lint][=package-lint=]] :: パッケージとしての要件を満たしているかを検証してくれます。Emacsの最低バージョンで対応していない関数を利用してしまっていないか、
+  ヘッダのバージョンや説明文がきちんと書かれているか、接頭辞が正しく運用されているか、などを確かめてくれます。
+  詳しくは[[https://github.com/purcell/package-lint][package-lintのGitHub]]及び[[https://www.gnu.org/software/emacs/manual/html_node/elisp/Coding-Conventions.html][Emacs Lispのコーディング規約]]をご覧ください。
+  もし今利用しているEmacsで利用したい場合は、 =M-x package-install RET package-lint RET= などを用いてインストールしたあと、
+  該当バッファで =package-lint-current-buffer= コマンドを実行してください。
+- =checkdoc= :: ドキュメント周りの問題を指摘してくれます。引数がすべて入っているか、ピリオドの後にスペースが2つ入っているか、
+  ドキュメントの各行が80桁以下になっているか、などを確認します。
+  詳細は [[https://github.com/emacs-mirror/emacs/blob/master/lisp/emacs-lisp/checkdoc.el][checkdoc.elのソースコード]]の説明文(Commentary)をご覧ください。
+  なお、これは標準搭載のパッケージなので、インストールは必要ありません。
+  もし今利用しているEmacsで利用したい場合は、該当バッファで =checkdoc= コマンドを実行してください。
+- =byte-compile= :: コンパイルしたときにエラーや警告が出ないかどうかを確認します。
+  もし今利用しているEmacsで利用したい場合は、 =byte-compile-file= コマンドを実行して該当ファイルを指定してください。
+
+これらは通るのが望ましいが絶対に通さないといけないものではないため、 =continue-on-error= は =true= としています。
+
+*** .dir-locals.el
+このファイルは、前述したファイルローカル変数を、ディレクトリ単位で設定するためのファイルです。
+=((メジャーモード (変数 . 値) ...)...)= のような構造になります。
+このファイルのあるディレクトリ以下にあるファイルを開いたとき、
+そのファイルで立ち上がったメジャーモードに応じて変数の値をファイルローカルに指定できます。
+#+begin_src emacs-lisp
+  ((emacs-lisp-mode (package-lint-main-file . "sample.el")))
+#+end_src
+ここでは、Emacs Lispファイルを開いたときに =package-lint-main-file= を ="sample.el"= に束縛しています。
+
+=package-lint-main-file= は文字通り、
+=package-lint= においてパッケージのメインのファイルとして認識されるべきファイルを指定します。
+メインのファイル以外にはヘッダにバージョンや説明は必要ない、
+メインのファイル以外は接頭辞をファイル名と一致させる必要はない、など、
+lintを行うにあたってメインのファイルとそれ以外で違いがあるため、この変数を束縛しています。
+
+なお、初期状態では1ファイルのみの構成なので、このファイルはなくても構いません。
+複数ファイルにしたときに自動で効果を発揮します。
+
+*** codecov.yml
+先ほど述べたカバレッジの計測ツール =undercover= で計測したカバレッジは、前述したGitHub ActionsでCodecovへと送信されます。
+その際、当然テストを行った回数だけカバレッジが送信されます。
+今回の雛形におけるGitHub ActionsではEmacsの各バージョンでテストを行うようにしているので、
+全てが届くまでCodecovに待ってもらう必要がある場合があります。
+それを設定しているのがこのファイルです。15種類のバージョンについてテストしている(snapshotバージョンのEmacsは不安定なので除く)ので、
+=codecov.notify.after_n_builds= に =15= を指定しています。
+#+begin_src yaml
+  codecov:
+      notify:
+          after_n_builds: 15
+#+end_src
+なぜ =notify= なのかと思うかもしれません。実はここで指定しているのはGitHubへと送られてくる通知の遅延設定です。
+適切にCodecovの設定をすると、各コミットのカバレッジ計測の結果をコミットステータスとして通知してくれます。
+しかし、最初の1つのカバレッジだけを採用して通知してしまうと、Emacsのバージョンによる分岐を含む場合に正しいカバレッジを通知することができません。
+そこで、このファイルでいくつのカバレッジが送信されるのかをあらかじめCodecovに教えています。
+
+** このテンプレートにおいて、対応Emacsバージョンを上げるのにやらねばならないこと
+ここまでで、パッケージを作る際に必要な情報はほぼ説明しました。
+あと少しだけ、このテンプレートを用いているときに、対応Emacsバージョンを上げる場合になにをすればよいかを纏めておきます。
+
+1. メインのファイルのヘッダの =Package-Requires: ((emacs "24.1"))= を上げたいバージョンに変更する。
+2. =.github/workflows/test.yml= の =jobs.test.strategy.matrix.emacs_version= に渡しているリストの中から、
+   サポート対象外となるバージョンを取り除く。
+3. =codecov.yml= の数字を、取り除いたバージョン分だけ減らす。
+  ここの数字は =jobs.test.strategy.matrix.emacs_version= の個数から =snapshot= の分の1を引いた数と一致する。
+
+** 最後に
+今回は、パッケージを作る際の雛形の解説を通じ、パッケージを作る際のノウハウを説明しました。
+かなり長くなってしまいましたが、だからこそ抜けや漏れがある可能性は多いにあります。
+もしなにか間違っている点、おかしな点、理解できなかった点、質問などがあれば、
+コメントやメール、[[https://emacs-jp.github.io/][Emacs JP]]のSlackなどでなんなりとご連絡ください。
+Emacs JPには私よりも長くEmacsを使っている猛者たちがたくさんいます。
 
 * TODO 自分専用のELPA(Emacs Lisp Package Archive)をGitHubでホストしよう
   :PROPERTIES:
