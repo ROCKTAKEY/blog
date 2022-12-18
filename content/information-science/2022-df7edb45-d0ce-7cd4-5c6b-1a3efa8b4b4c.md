@@ -1,8 +1,8 @@
 +++
-title = "Emacsのパッケージをつくってみよう"
+title = "Emacsのパッケージを作る際の手引き"
 author = ["ROCKTAKEY"]
 date = 2022-12-19T04:32:00+09:00
-lastmod = 2022-12-19T04:32:44+09:00
+lastmod = 2022-12-19T04:33:20+09:00
 tags = ["Emacs", "Emacs-Lisp"]
 draft = false
 +++

@@ -1245,7 +1245,7 @@ Guix Systemを導入し、さらにこの記事を書くにあたり、 [[https:
 
 また、Taijuさんと共に[[https://join.slack.com/t/guix-jp/shared_invite/zt-17aoza5yo-KAVDj5aPPwsJ9X7e4lJteg][Guix-jp]]というGNU Guix及びGNU Guix Systemの日本語コミュニティを立ち上げました。
 すこしでもGuixに興味を持った方は、是非遊びにきてください!!
-* DONE Emacsのパッケージをつくってみよう
+* DONE Emacsのパッケージを作る際の手引き
 CLOSED: [2022-12-19 Mon 04:32]
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-df7edb45-d0ce-7cd4-5c6b-1a3efa8b4b4c
