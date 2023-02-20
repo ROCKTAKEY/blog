@@ -2487,10 +2487,6 @@ Emacs JPには私よりも長くEmacsを使っている猛者たちがたくさ�
   :END:
 [[https://qiita.com/advent-calendar/2022/emacs][https://img.shields.io/badge/Emacs%20Advent%20Calendar%202022-13%E6%97%A5%E7%9B%AE-d60a34.svg?style=flat-square&logo=qiita]]
 
-** TL;DR
-- [[https://github.com/ROCKTAKEY/template-github-elpa][template-github-elpa]]をテンプレートとしてレポジトリ(仮に"github.com/yourname/A"とする)を作り、 =recipes/= 以下にレシピをコミット
-- =https://yourname.github.io/A/= がパッケージアーカイブとして利用できる
-
 ** 序文
 [[https://blog.rocktakey.com/information-science/2022-df7edb45-d0ce-7cd4-5c6b-1a3efa8b4b4c/][前回の記事]]では、パッケージの作り方を扱いました。
 パッケージを作ったら、今度は自分のEmacsに導入したいと考えるでしょう。
@@ -2521,7 +2517,7 @@ GNU GuixやNix、aptなどの汎用パッケージマネージャは除いてい
 レシピを配信するサーバーが落ちてもビルド自体はローカルなので問題にならないというメリットがあります。
 もちろんソースコードを頒布するサーバーが落ちている場合はビルドできませんが、
 それはパッケージ単位の話で、全てのパッケージを少数のサーバーに依存する中央集権型にはないメリットです。
-ただし、大半の人が =GitHub= や =GitLab= にホストしているため、
+ただし、 =GitHub= や =GitLab= をはじめとした有名なホスティングサービスでホストしたパッケージが大半なので、
 実質的には少数のサーバーに依存してしまっているのが現状です。
 
 中央集権型がpackage.elしかなく、分散型がほとんどを占める理由はおそらく単純で、
@@ -2533,7 +2529,7 @@ GNU GuixやNix、aptなどの汎用パッケージマネージャは除いてい
 一方package.elと同様の配信形式をそのまま利用するのであれば、単にpackage.elをバックエンドとすればよいでしょう。
 すると必然的にpackage.elのラッパとなります。
 
-中央集権型のpackage.elにはもう一つデメリットがあります。
+中央集権型のpackage.elにはもう一つ大きなデメリットがあります。
 それは、気軽にパッケージを追加できないことです。
 分散型の場合、ローカルにビルド環境が必要ですが、それさえ用意してしまえば、
 レシピを経由して自作パッケージと他の人のパッケージを統一的に扱うことができます。
@@ -2562,10 +2558,178 @@ github-elpaはCLIから直接呼びだせるようになっており、READMEで
 詳しくは後述しますが、このテンプレートを利用する場合、
 =recipes/= 以下にレシピを書いて =keg run build= すれば、 =docs/elpa/= 以下にパッケージアーカイブが作成されます。
 
-** パッケージアーカイブの仕組み
-パッケージアーカイブの構造は2種類で構成されています。
-- archive
+** 使用方法
+ここでは、[[https://github.com/10sr/github-elpa][github-elpa]]を使うことに焦点を当てた説明を行います。
+具体的になにをしているのか、詳細な説明は[[#technical-description][次章]]をご覧ください。
 
+また、手元で実際のビルド結果を確認したい場合は、
+あらかじめ[[https://github.com/conao3/keg.el][keg.el]]をインストールしておいてください。
+Emacsが既にインストールされていれば、クローンしてパスを通すだけで動きます。
+なお、このツールはEmacs Lispパッケージ及びプロジェクト管理のためのツールで、 =npm= や =yarn= のようなものです。
+デファクトスタンダードは特にないため、私の好みでこれを使っているだけです。
+
+さて、順に使用方法を述べていきます。
+
+1. まず、[[https://github.com/ROCKTAKEY/template-github-elpa][template-github-elpa]]をテンプレートとして、GitHubでレポジトリを作成してください。
+  ここで作ったレポジトリ名を仮に =yourreponame= とします。
+  すると、ユーザー名を =yourname= としたとき、今作成したレポジトリのURLは =https://github.com/yourname/yourreponame=
+  となるはずです。ちなみに、ここでそれっぽい名前を付けると愛着が湧きます。
+2. =recipes/= 以下にレシピを書きます。
+   ここで言うレシピとは、[[https://github.com/melpa/package-build][package-build]]が認識できるフォーマットによって書かれたパッケージの定義のことです。
+   パッケージのソースコードがどこにあるか、そのうちどのファイルを配布するのか、などを指定します。
+   なお、レシピはパッケージ管理システムによってフォーマットが異なる場合があることに注意してください。
+   レシピ自体はEmacs標準の概念ではなく、単にサードパーティのパッケージ管理システムやパッケージビルダーがパッケージの指定を簡単にするために
+   導入したものです。
+
+   以下に[[https://github.com/melpa/melpa#recipe-format][MELPAのREADME]]にあるレシピのフォーマット
+   ([[https://github.com/melpa/package-build][package-build]]はMELPAプロジェクトの一部で、レシピのフォーマットはここを見るように[[https://github.com/melpa/package-build][package-build]]のREADMEに書いてある)を転載します。
+   なお、S式としてパースされるため、改行は空白と等価です。
+   また、 =[]= 内は省略可能、もしくは選択肢のなかから選ぶ方式を取る値です。
+   #+BEGIN_SRC emacs-lisp
+     (<package-name>
+      :fetcher [git|github|gitlab|codeberg|sourcehut|hg]
+      [:url "<repo url>"]
+      [:repo "user-name/repo-name"]
+      [:commit "commit"]
+      [:branch "branch"]
+      [:version-regexp "<regexp>"]
+      [:files ("<file1>" ...)]
+      [:old-names (<old-name> ...)])
+   #+END_SRC
+   通常、ファイル名は =<package-name>= と同一にします。
+   主要なキーワードだけ軽く説明します。
+   - =<package-name>= :: パッケージの名称。 =package-list-packages= などではこの名前で見える。
+     メインのファイルは =<package-name>.el= であることが推奨される。
+   - =:fetcher= :: 対象のパッケージのソースコードがどこでどうホストされているかを示す。
+     =github= 、 =gitlab= 、 =codeberg= 、 =sourcehut= の4つのホスティングサービスには直接対応している。
+     それ以外でホストしている場合は、利用しているバージョン管理システムに応じて =git= か =hg= を指定する。
+   - =:repo= :: レポジトリを表す文字列で、 =ユーザー名/レポジトリ名= のようなものを与える。
+     なお、これは =:fetcher= でホスティングサービスを直接指定したときにのみ有効。
+   - =:url= :: レポジトリのURL。 =:fetcher= でバージョン管理システムを指定したときにのみ有効。
+   - =:files= :: 対象パッケージに含むべきファイル名に一致する正規表現のリスト。
+     なお、このリストの末尾の要素は =(:exclude "正規表現"...)= でもよく、ここにある正規表現に一致するファイルは、
+     たとえ含むべきファイルの正規表現に一致したとしても除外される。
+     なにも指定しなければ以下の値になる([[https://github.com/melpa/melpa#recipe-format][MELPAのREADME]]より転載、最新の情報は転載元を確認してください)。
+     #+BEGIN_SRC emacs-lisp
+       '("*.el" "lisp/*.el"
+         "dir" "*.info" "*.texi" "*.texinfo"
+         "doc/dir" "doc/*.info" "doc/*.texi" "doc/*.texinfo"
+         "docs/dir" "docs/*.info" "docs/*.texi" "docs/*.texinfo"
+         (:exclude
+          ".dir-locals.el" "lisp/.dir-locals.el"
+          "test.el" "tests.el" "*-test.el" "*-tests.el"
+          "lisp/test.el" "lisp/tests.el" "lisp/*-test.el" "lisp/*-tests.el"))
+     #+END_SRC
+     もしデフォルトのファイル群に付け足す形で指定したい場合は、リストの先頭要素として =:defaults= を書くとよい。
+     そうすると、上記のデフォルトに加えて、リストの先頭でない要素の正規表現にマッチしたファイルが認識される。
+
+   さて、レシピの簡単な説明を終えたところで、レシピを書いてみましょう。
+   コピペで動くように、とりあえず存在するパッケージをそのまま利用します。
+   例として今回用意した特になにもしないパッケージである[[https://github.com/ROCKTAKEY/dummy-example-el][dummy-example]]を用います
+   (他人の書いたパッケージが今後存在し続けることを担保するのが面倒なのでダミーのパッケージを用意しました)。
+   自分で定義したパッケージがあるのなら、是非そちらに書きかえてみてください。
+   #+BEGIN_SRC emacs-lisp
+     ;; ファイル名: recipes/dummy-example
+     (dummy-example :fetcher github :repo "ROCKTAKEY/dummy-example-el")
+   #+END_SRC
+   書き方は先ほどの通りで、ファイル名とパッケージ名を一致させ、 =fetcher= はコードがGitHubにあることから =github= に指定、
+   ユーザー名 =ROCKTAKEY= でレポジトリ名 =grugru= なので =:repo= に ="ROCKTAKEY/grugru"= と指定します。
+   自分のパッケージを作成したい場合は適宜置き換えてください。
+   なお、レシピの編集のためのメジャーモードとして =package-recipe-mode= というモードが[[https://github.com/melpa/package-build][package-build]]パッケージで提供されているので、
+   是非お使いください。
+
+3. レシピを書いたので、手元でビルドしてみます。
+   なお、この操作自体は必須ではなく、レシピさえコミットしてしまえばGitHub Actionsでビルドしてくれます。
+   ただし、ビルドすることでなにが起こるか、正常にビルドできるか確かめるために手元で実行しておくことが望ましいです。
+
+   この章の最初で述べたように[[https://github.com/conao3/keg.el][keg.el]]をインストールしたら、クローンしたあなたのレポジトリで以下を実行してください。
+   #+BEGIN_SRC shell
+     keg install
+     keg run build
+   #+END_SRC
+   一行目でgithub-elpa及びその依存先をインストールし、二行目でレシピからパッケージをビルドします。
+   =Keg= ファイルに書いてある通りですが、
+   二行目は =keg emacs --batch -Q --eval (require 'github-elpa) -f github-elpa-build= を(github-elpa及びその依存先にload-pathを通した上で)
+   実行しているだけです。
+   成功すれば、二行目に対する出力として以下のようなものが得られるはずです。
+   #+BEGIN_EXAMPLE
+     Install dependencies
+      DevDependency: ((github-elpa 0.0.1))
+
+     All dependencies already satisfied
+     Exec command: keg emacs --batch -Q --eval \(require\ \'github-elpa\) -f github-elpa-build
+     Exec command: emacs --batch -Q --eval \(require\ \'github-elpa\) -f github-elpa-build
+
+
+     :: github-elpa: packaging recipe dummy-example
+     Package: dummy-example
+     Fetcher: github
+     Source:  https://github.com/ROCKTAKEY/dummy-example-el.git
+
+     Cloning https://github.com/ROCKTAKEY/dummy-example-el.git to /home/rocktakey/sandbox/template-github-elpa/.github-elpa-working/dummy-example/
+     Checking out 4776eee32b38dbfcdd45b2d87e2c5ce989e5ce05
+     Built dummy-example in 0.908s, finished at 2023-02-20T17:02:09+0000
+   #+END_EXAMPLE
+   各パッケージにどんなファイルが含まれているかなど、ビルドの詳細が出力されています。複数のレシピがあれば複数のログが出力されるはずです。
+   なお、ビルド生成物は =./docs/elpa/= 以下に出力されています。
+
+4. 最後にこれをコミットしましょう。すると、GitHub Actionsによって自動的にビルドされ、
+   パッケージアーカイブが =https://yourname.github.io/yourreponame/= にデプロイされます。
+   なお、デフォルトでは =cron= を用いて毎日1回ビルドが走るようになっています。適宜変更してください。
+
+   =./.github/workflows/pages.yml= を見るとわかりますが、先ほど手元で行ったビルドプロセスと全く同じことを実行した上で、
+   GitHub Pagesに =./docs/elpa/= 以下をデプロイしているだけです。
+   また、PRなどに対してビルドテストが走るようにしています(=./.github/workflows/test.yml= を参照)。
+   テストでも同様にビルドを走らせているだけです。
+
+5. init.elを変更して、package.elにアーカイブの場所を教えてあげましょう。
+   以下をinit.elに追加してください。 =好きな名前= のところは好きな名前に置き換えてください。
+   レポジトリの名前と揃っているとわかりやすいかもしれませんが、必須ではありません。
+   ここの名前はパッケージをリスト形式で並べるときに出てくるので、自分の識別しやすい名前にしてください。
+   #+BEGIN_SRC emacs-lisp
+     (add-to-list 'package-archives '("好きな名前" . "https://yourname.github.io/yourreponame/"))
+   #+END_SRC
+   ここで =package-list-packages= を実行すると、パッケージのリストが画面に表れます。
+   しばらくするとリフレッシュ(パッケージアーカイブの最新情報をURLから取ってくる操作)が終了し、新しいパッケージがリストに追加されます。
+   以後、このリストで =i= を押してパッケージをマークしてから =x= を押すか、 =package-install= コマンドを使うことでインストールできます。
+   また、リストせずにリフレッシュだけしたい場合は =package-refresh-contents= コマンドを実行すればよいです。
+
+** 技術的な仕組みの説明
+:PROPERTIES:
+:CUSTOM_ID: technical-description
+:END:
+この章はパッケージアーカイブがどのような仕組みで構成されているかを説明します。
+先ほどのテンプレートを使用するだけであればこの章を読む必要はありません。
+
+*** パッケージアーカイブの仕組み
+そもそもパッケージアーカイブとは、どのようなディレクトリ構成になっていればよいのでしょうか。
+それさえ把握してしまえば、 =package-build= や =github-elpa= を利用する必要はありません。
+
+パッケージアーカイブのディレクトリ構造は、ルートディレクトリに対して以下のようになっています。
+#+BEGIN_EXAMPLE
+  .
+  ├── archive-contents
+  ├── package1-20230220.1700.el
+  ├── package1-20230220.1700.entry
+  ├── package1-readme.txt
+  ├── package2-20230121.1825.entry
+  ├── package2-20230121.1825.tar
+  └── package2-readme.txt
+#+END_EXAMPLE
+大きくわけると4種類に分けられます。
+- アーカイブ全体についてのファイル
+  - =archive-contents= ファイル
+- 各パッケージについてのファイル
+  - =*.el= / =*.tar= ファイル
+  - =*-readme.txt= ファイル
+  - =*.entry= ファイル
+これらのそれぞれについて解説していきます。
+
+**** =archive-contents= ファイル
+このファイルは、package.elのリフレッシュの際に用いられます。
+このファイルはアーカイブがどのようなパッケージを持っているかをalistで保持しています。
+
+# =package--download-one-archive=
 * TODO MELPAにパッケージを提出してみんなに使ってもらおう
   :PROPERTIES:
   :EXPORT_FILE_NAME: 2022-c6b38d7a-1974-ad04-8ebb-ee117a8a1d2d
