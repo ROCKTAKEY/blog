@@ -3937,6 +3937,12 @@ CLOSED: [2022-12-11 Sun 04:20]
   :END:
 [[https://qiita.com/advent-calendar/2022/guix][https://img.shields.io/badge/GNU%20Guix%20Advent%20Calendar%202022-7%E6%97%A5%E7%9B%AE-d60a34.svg?style=flat-square&logo=qiita]]
 
+#+begin_details
+#+begin_summary
+更新履歴
+#+end_summary
+- 2023-06-09: [[#add-dependency-to-your-channel][チャンネルの依存のintroduction節の書き方の変更]]
+#+end_details
 ** 序文
 [[https://blog.rocktakey.com/information-science/2022-c5b823db-a6b6-23a4-5783-c7741fd0f420/][前回の記事]]では、ビルドを伴うパッケージの作成を行いました。
 しかし、どうしてもビルドがうまくいかないこともあります。
@@ -4013,6 +4019,9 @@ Nonguixの提供するビルドシステムを利用したパッケージを自�
 例として、[[https://github.com/latex-lsp/texlab][texlab]]という言語サーバーについてのパッケージを作成します。
 
 *** 自分のチャンネルに依存チャンネルを追加する
+:PROPERTIES:
+:CUSTOM_ID: add-dependency-to-your-channel
+:END:
 チャンネルの宣言は、チャンネル直下の =.guix-channel= に以下のように書いていました。
 #+BEGIN_SRC scheme
   (channel
@@ -4030,9 +4039,10 @@ Nonguixの提供するビルドシステムを利用したパッケージを自�
      (url "https://gitlab.com/nonguix/nonguix")
      ;; Enable signature verification:
      (introduction
-      (make-channel-introduction
-       "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
-       (openpgp-fingerprint
+      (channel-introduction
+       (version 0)
+       (commit "897c1a470da759236cc11798f4e0a5f7d4d59fbc")
+       (signer
         "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))))
 #+END_SRC
 =dependencies= フィールドが追加されています。
@@ -4040,6 +4050,36 @@ Nonguixの提供するビルドシステムを利用したパッケージを自�
 基本的には前節のチャンネル追加と同じものですが、1点だけ注意事項として、 =name= フィールドにクオート ='= がありません。
 前節のチャンネル追加では =(name 'nonguix)= としましたが、依存の追加では =(name nonguix)= となっています。
 このようになっている理由は不明ですが、ハマりすいので注意してください。
+
+#+begin_details
+#+begin_summary
+2023-06-09: チャンネルの依存のintroduction節の書き方の変更
+#+end_summary
+依存先の =introduction= の書き方がいつのまにか変更されていたため、コードを書き換えました。
+変更点は以下の通りです。
+- =make-channel-introduction= の代わりに =channel-introduction= を利用する。
+- 通常のコンストラクタ(呼び方が合っているかは怪しい)を呼び出すようになったため、全ての値にフィールド名を付けることになった。
+  元々フィールド名が付いていなかったコミットハッシュは =commit= 、元々 =openpgp-fingerprint= をフィールド名のようにしていた
+  フィンガープリントは =signer= をフィールドとする。
+- 依存するチャンネルのバージョン情報として =version= フィールドを与えることになった(例えばNonguixでは =(version 0)=)。
+
+変更前のコードを以下に示しておきます。
+#+BEGIN_SRC scheme
+  (channel
+   (version 0)
+   (url "<your-channel-URL>")
+   (dependencies
+    (channel
+     (name nonguix)
+     (url "https://gitlab.com/nonguix/nonguix")
+     ;; Enable signature verification:
+     (introduction
+      (make-channel-introduction
+       "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+       (openpgp-fingerprint
+        "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))))
+#+END_SRC
+#+end_details
 
 *** パッケージを定義する
 前回同様、モジュールやパッケージ定義の雛形を最初に書きます。
@@ -4425,6 +4465,12 @@ https://guix.gnu.org/en/manual/devel/en/html_node/Software-Freedom.html
 **** 命名法
 https://guix.gnu.org/en/manual/devel/en/html_node/Package-Naming.html
 
+Schemeを使ってパッケージを定義する都合上、 =package= オブジェクトを格納する変数のシンボル名と、
+=package= オブジェクトの =name= 属性に保持される文字列の、二つのパッケージ名が存在します。
+基本的には同じ名前を付けます。なお、 =guix package= コマンドからアクセスできるのはオブジェクトの =name= 属性です。
+また、同じソフトウェアの複数バージョンを管理したい場合は、変数名の後ろに =-2.5= のような接尾辞を付けます。
+接尾辞がなにも付いていないものを安定版のエイリアスとすることが多いイメージです。
+
 基本は全て小文字、アンダースコアはハイフンに置き換えたものを利用します。
 プロジェクト名が1文字である場合、及び同様の名前のプロジェクトが存在する(Guixのパッケージになっているかは問わない)場合、
 それらが識別できるようになんらかの接頭辞や接尾辞を付けましょう。
@@ -4432,6 +4478,37 @@ https://guix.gnu.org/en/manual/devel/en/html_node/Package-Naming.html
 ただし、[[https://guix.gnu.org/en/manual/devel/en/html_node/Python-Modules.html][Python]]、[[https://guix.gnu.org/en/manual/devel/en/html_node/Perl-Modules.html][Perl]]のモジュール及び[[https://guix.gnu.org/en/manual/devel/en/html_node/Fonts.html][フォント]]のパッケージは独自の命名法があるので、各項を参照してください。
 
 その他のパッケージでも、言語用の =guix import= が用意されている場合はその形式に寄せてあることが多いです。
+
+**** バージョン番号
+https://guix.gnu.org/en/manual/devel/en/html_node/Version-Numbers.html
+
+=package= オブジェクトの =version= 属性には、基本的にタグが打ってあるバージョンをそのまま利用しますが、
+=v= のような接頭辞は付けず、 =.= 区切りのバージョンを指定します。
+
+最後に更新されたバージョンがあまりにも古い場合や、そもそもまともにバージョンを付けていない場合もよくあると思います。
+その場合、こちらで独自にバージョンを生成しておきます。具体的には、 =バージョン-通し番号-コミットハッシュ= のような形式です。
+具体的に書くならば =1.0.0-1-abcdef2= のようなものです。通し番号は =0= スタートでパッケージ定義をアップデートする度に1ずつ大きくしていきます。
+もちろんこれをこの形のまま維持するのは面倒なので、 =let= でコミットハッシュ =commit= と通し番号 =revision= を束縛していおいて、
+=git-version= で生成するのが通例となっています(バージョン自体はハードコードしてしまってよい)。
+以下に例を[[https://guix.gnu.org/en/manual/devel/en/html_node/Version-Numbers.html][公式マニュアル]]から引用しておきます。
+#+BEGIN_SRC scheme
+  (define my-package
+    (let ((commit "c3f29bc928d5900971f65965feaae59e1272a3f7")
+          (revision "1"))          ;Guix package revision
+      (package
+        (version (git-version "0.9" revision commit))
+        (source (origin
+                  (method git-fetch)
+                  (uri (git-reference
+                        (url "git://example.org/my-package.git")
+                        (commit commit)))
+                  (sha256 (base32 "1mbikn…"))
+                  (file-name (git-file-name name version))))
+        ;; …
+        )))
+#+END_SRC
+
+
 
 ** Guixをビルドする
 https://guix.gnu.org/en/manual/devel/en/guix.html#Building-from-Git
