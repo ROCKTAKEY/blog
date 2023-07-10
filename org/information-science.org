@@ -4456,7 +4456,7 @@ https://guix.gnu.org/en/manual/devel/en/html_node/Software-Freedom.html
 大抵の場合にはソフトウェアがオープンソースソフトウェアの定義に合致していれば自由ソフトウェアです。
 ただし、DRMについてのコードが含まれていたり(例: Firefox)、権限を持った企業だけが実行できるようになっていたり、
 オープンソースであるが自由でないソフトウェアも少数ながら存在します。
-詳しい違いはGNUの記事の[[https://www.gnu.org/philosophy/open-source-misses-the-point.html][なぜ、オープンソースは自由ソフトウェアの的を外すのか]]を参照してください(この段落はこの記事を参考にしました)。
+詳しい違いはGNUの記事の[[https://www.gnu.org/philosophy/open-source-misses-the-point.html][なぜ、オープンソースは自由ソフトウェアの的を外すのか]]を参照してください(この段落はこの記事を参考に記述しています)。
 
 こう聞くと少し怖く感じるかもしれませんが、
 企業の出しているオープンソースソフトウェアでなければほとんどは問題ありません。
@@ -4508,7 +4508,33 @@ https://guix.gnu.org/en/manual/devel/en/html_node/Version-Numbers.html
         )))
 #+END_SRC
 
+**** 概要欄と説明欄
+https://guix.gnu.org/en/manual/devel/en/html_node/Synopses-and-Descriptions.html
 
+=package= オブジェクトの =synopsis= 属性と =description= 属性には、それぞれ概要と説明を書きます。
+両方とも =guix search= で検索する際の対象なので、ひっかかりやすい内容にするとよいです。
+
+概要 =synopsis= で最もひっかかりやすいところは、先頭に冠詞を付けないことと、末尾にピリオドを付けないことです
+(特に追加で情報が伝わるわけでもないのに文字数が増えてしまうことが理由)。
+あとはきちんとそのパッケージの機能や用途がわかるように書く、というある意味当たり前のことが書かれています。
+専門外の人にもわかるように書くことも勧められています(程度の問題なのでどこまでやるかむずかしいところ)。
+
+説明 =description= はTexinfo書式で書くことができます。あまり馴染みはないかもしれませんが、
+雑に言うと =@code{...}= のようにアットマークでマークアップを行うものです。
+これ自体を詳しく紹介してもしょうがないので、詳しいことは[[https://www.gnu.org/software/texinfo/manual/texinfo/html_node/index.html][Texinfoの公式マニュアル]]に預けます。
+よく使うのは[[https://www.gnu.org/software/texinfo/manual/texinfo/html_node/_0040code.html][コード断片を示す =@code{...}= ]]と、[[https://www.gnu.org/software/texinfo/manual/texinfo/html_node/_0040itemize.html][箇条書きを示す =@itemize @bullet [@item ...]* @end itemize=]]です。
+[[https://www.gnu.org/software/texinfo/manual/texinfo/html_node/Special-Characters.html#Special-Characters][アットマークと波括弧についてはエスケープが必要]]なので、そこだけ注意しておきましょう。
+
+説明は5から10行で書くように書いてあります。が、実際もっと短いものもそれなりに登録されています。
+「先進的」や「次世代」のような、特に意味のない煽り文句は入れずに、機能や用途だけを書くようにしてください。
+概要の冠詞やピリオドと同様で、無駄な言葉を情報密度を高めましょうということです。
+
+概要や説明は全て[[https://translate.fedoraproject.org/projects/guix/packages][Weblate]]上で翻訳を行えるようになっています。
+文字列の抽出をつつがなく行えるように、 =format= や =string-append= の利用は避けてください。
+=;; TRANSLATORS:= で始まるコメントを各属性の直上に書いておくことで、翻訳者に申し送り事項を残すこともできます。
+翻訳するべきでない言葉を示したりするのに便利です。
+
+なお、ここで言われていることのうち、機械的に検出可能なものについては[[linterとformatterを実行する][後述する =guix lint= が指摘してくれます]]。
 
 ** Guixをビルドする
 https://guix.gnu.org/en/manual/devel/en/guix.html#Building-from-Git
@@ -4518,3 +4544,5 @@ https://guix.gnu.org/en/manual/devel/en/guix.html#Building-from-Git
   ./configure --localstatedir=/var
   make
 #+END_SRC
+
+** linterとformatterを実行する
