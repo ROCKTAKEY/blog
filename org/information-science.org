@@ -4536,6 +4536,11 @@ https://guix.gnu.org/en/manual/devel/en/html_node/Synopses-and-Descriptions.html
 
 なお、ここで言われていることのうち、機械的に検出可能なものについては[[linterとformatterを実行する][後述する =guix lint= が指摘してくれます]]。
 
+**** 個々のパッケージについての注意点
+https://guix.gnu.org/en/manual/devel/en/html_node/Packaging-Guidelines.html
+ここにあるように、
+
+
 ** Guixをビルドする
 https://guix.gnu.org/en/manual/devel/en/guix.html#Building-from-Git
 
@@ -4546,3 +4551,50 @@ https://guix.gnu.org/en/manual/devel/en/guix.html#Building-from-Git
 #+END_SRC
 
 ** linterとformatterを実行する
+
+* TODO GuixでRustのパッケージを作成する (2025年版)
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: 2025-560468ab-3c34-2924-400b-71ee3aa40bf4
+  :EXPORT_HUGO_TAGS: GNU-Guix Scheme
+  :END:
+いままでRustのパッケージはすべてGuixのパッケージと一対一対応していた。
+そのため、あるRustパッケージをビルドするためには、 =#:cargo-inputs= として引数に渡されている依存パッケージを全てビルドする必要があった(たしかビルドしないというオプションはあったはずだが)。
+一方Rustのビルドプロセス上、全ての依存はソースコードを利用してコンパイルされるため、依存パッケージがバイナリへビルドされている必要は全くなかった。
+また、Rustパッケージに対応するGuixパッケージの数も依存の数に応じてどんどん増えていってしまうなど、管理上の問題も多数あった。
+
+しかし[[https://guix.gnu.org/blog/2025/a-new-rust-packaging-model/][2025年にその方針が改められ、バイナリが真に必要なRustパッケージ以外は全てソースコードのみの依存とすることとなった]]。
+これは革命的で、これによってRustのパッケージに対応するGuixパッケージは「ユーザにアプリケーションとして利用されるもの」「Rustパッケージ以外にライブラリとして利用されるもの」くらいになる。
+これに伴ってRustパッケージの作成もかなり簡単になったので、その方法をここで説明する。
+
+** 前提条件
+チャンネルは既に保持しているものとする。
+もし持っていない場合は、[[https://blog.rocktakey.com/information-science/2022-770eb4b6-5c63-62d4-bbcb-475d92404603/][Guixのパッケージをつくってみよう-その1: 簡単なフォントのパッケージを作る]]などを参考に作成して欲しい。
+
+** 要約
+- Rustのパッケージの依存先のみを管理するファイルである ~mychannel/packages/rust-crates.scm~ を用意する (初回のみ。通常は全パッケージ共通)。
+- 対象となるパッケージの ~Cargo.lock~ (~/path/to/Cargo.lock~) を入手する (バージョンに注意。gitレポジトリならきちんとタグをチェックアウトすること)。
+- ~guix import --insert=/path/to/mychannel/packages/rust-crates.scm crates -f /path/to/Cargo.lock <PACKAGE名>~ を実行する。
+- ~guix import --insert=/path/to/mychannel/packages/rust-apps.scm crates <PACKAGE名>~ を実行する (このファイルはパッケージ毎に変えてもよい)。
+- ~(cargo-inputs <PACKAGE名>)~ を ~(cargo-inputs <PACKAGE名> #:module '(mychannel packages rust-crates))~ に置き換える (初回に作成したRustパッケージ用モジュール)。
+- 取得しきれていないメタデータの補完や、Guix特有の問題に起因するビルドフェーズの修正を行う。
+
+** Rustのパッケージの依存先のみを管理するファイルを用意する
+
+** 依存をソースコードとしてインポートする
+
+** 本体をGuixパッケージとしてインポートする
+
+** できたパッケージを調整する
+大半の場合そのままではビルドできないので、以下によくある対処を記載しておきます。
+
+*** ビルドでコンパイルエラーが出る
+Rustのバージョンを変更する(=#:rust= 、rustupも)
+
+*** 依存がみつからない
+gitレポジトリへの依存を削除する(=substitute*=)
+
+*** インストールで失敗する
+バイナリやライブラリとしてインストールしたいクレートのディレクトリを指定する(=#:cargo-install-paths=)
+
+*** テストが失敗する
+成功しないテストを無効化する(=--skip=)
