@@ -5171,12 +5171,23 @@ Guix SystemはFilesystem Hierarchy Standard(以下FHS)に準拠しない上に =
     /path/to/your/project/target/debug/build/icu_normalizer_data-02b3286e562902a4/build-script-build: error while loading shared libraries: libgcc_s.so.1: cannot open shared object file: No such file or directory
 #+end_src
 
-これをどう解決するか頭を抱えたが、とりあえず応急処置として =RUSTFLAG= に =-C= 経由でRPATHとして =libgcc_s.so.1= の場所を与えることで動作させることが可能だということがわかった。
+これをどう解決するか頭を抱えたが、とりあえず応急処置として =LD_LIBRARY_PATH= に =/lib= を追加することで解決できた。
 具体的には、 =--emulate-fhs= 影響下の =guix shell= 内で以下のコマンドを実行しておけばよい。
+#+begin_src shell
+  export LD_LIBRARY_PATH=/lib
+#+end_src
+
+原因についてはこれから調べ、わかり次第この記事に追記する予定だが、困る人もそれなりにいそうなので、応急処置のしかただけでもここに記しておく。
+
+#+begin_details
+#+begin_summary
+元々記載していたが後々微妙だとわかった方法
+#+end_summary
+以下は最初記載していた方法だが、 =cargo test= などの際に結局 =libgcc_s.so.1= が見つからないことがわかったため、別の方法を記載しなおした。
+
 #+begin_src shell
   export RUSTFLAGS="-C link-args=-Wl,-rpath,/lib"
 #+end_src
-一度これを実行しておくだけで、以降では =cargo build= や =cargo run= が通るようになる。
 
 一応軽く中身に触れると、 ~-C~ は =--codegen= の略で、コード生成、すなわち =rustc= に渡るオプションたちのことを指す。
 そのなかでも =link-args= はリンカの呼び出しに利用される。Linuxではこのオプションは =cc= に渡る。
@@ -5184,5 +5195,4 @@ Guix SystemはFilesystem Hierarchy Standard(以下FHS)に準拠しない上に =
 ここまでの説明はRust公式の[[https://doc.rust-lang.org/rustc/codegen-options/index.html][Codegen Options - The rustc book]]を参考にした。
 
 残りの =-rpath,/lib= がリンカ =ld= (たぶん)に渡る。これは =RPATH= 、すなわち実行時にリンカが動的ライブラリを探す場所として =/lib= を追加している。
-
-原因についてはこれから調べ、わかり次第この記事に追記する予定だが、困る人もそれなりにいそうなので、応急処置のしかただけでもここに記しておく。
+#+end_details
