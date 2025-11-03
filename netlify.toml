@@ -1,3 +1,10 @@
+[build]
+  command = "hugo"
+  publish = "public"
+
+[build.environment]
+  HUGO_VERSION = "0.152.2"
+
 [[redirects]]
   from = "http://rocktakey.netlify.app/*"
   to = "https://blog.rocktakey.com/:splat"
